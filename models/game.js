@@ -19,5 +19,5 @@ Game.pre('save', function(next){
 		this.created_at = currentDate;
 
 	next();
-};
+});
 module.exports = mongoose.model('Game', Game);

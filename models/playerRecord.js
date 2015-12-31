@@ -29,5 +29,5 @@ playerRecord.pre('save', function(next){
 		this.created_at = currentDate;
 
 	next();
-};
+});
 module.exports = mongoose.model('playerRecord', playerRecord);

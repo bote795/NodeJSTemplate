@@ -42,6 +42,10 @@ passport.use(new LocalStrategy(Account.authenticate()));
 passport.serializeUser(Account.serializeUser());
 passport.deserializeUser(Account.deserializeUser());
 
+//require other models
+var Game = require('./models/game');
+var group = require('./models/group');
+var playerRecord = require ('./models/playerRecord');
 //mongoose
 mongoose.connect(process.env.DB ||'mongodb://localhost/gameRecords');
 
