@@ -7,4 +7,9 @@ block content
     a(href="/register") Register
   if (user)
     p You are currently logged in as #{user.username}
+    a(href="#") Create New Group  
+    br
+    -for (var i= 0; i < groups.length; i++ )
+       a(href="#")=groups[i].name
+       br  
     a(href="/logout") Logout

@@ -2,10 +2,13 @@ var express = require('express');
 var passport = require('passport');
 var Account = require('../models/account');
 var router = express.Router();
+var Group = require('../models/group');
 
 
 router.get('/', function (req, res) {
-    res.render('index', { user : req.user });
+    Group.find({}, function(error, data) {
+        res.render('index', { user : req.user, groups: data });
+    });
 });
 
 router.get('/register', function(req, res) {
