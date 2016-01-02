@@ -1,10 +1,10 @@
 var express = require('express');
 var router = express.Router();
-var Game = require('../models/game');
+var Group = require('../models/group');
 
-router.route('/games')
+router.route('/groups')
     .get(function(req, res) {
-        Game.find(function(err, data) {
+        Group.find(function(err, data) {
             if(err) {
                 return res.send(500, err);
             }
@@ -12,47 +12,47 @@ router.route('/games')
         });
     })
     .post(function(req, res) {
-        var newGame = new Game();
-        newGame.name = req.body.name;
-        newGame.desc = req.body.desc;
-        newGame.coop = req.body.coop;
-        newGame.save(function(err, newGame) {
+        var newGroup = new Group();
+        newGroup.name = req.body.name;
+        newGroup.desc = req.body.desc;
+        newGroup.coop = req.body.coop;
+        newGroup.save(function(err, newGroup) {
             if(err) {
                 return res.send(500, err);
             }
-            return res.json(newGame);
+            return res.json(newGroup);
         });
     });
 
-router.route('/games/:id')
+router.route('/group/:id')
     .put(function(req, res) {
-        Game.findById(req.params.id, function(err, game) {
+        Group.findById(req.params.id, function(err, group) {
             if(err) {
                 res.send(err);
             }
-	      	game.name = req.body.name;
-	        game.desc = req.body.desc;
-	        game.coop = req.body.coop;
-            game.save(function(err, game) {
+	      	group.name = req.body.name;
+	        group.desc = req.body.desc;
+	        group.coop = req.body.coop;
+            group.save(function(err, group) {
                 if(err) {
                     res.send(err);
                 }
-                //res.json(game);
-                res.redirect('./groups')
+                //res.json(group);
+                res.render('./group',group)
             });
         });
     })
     .get(function(req, res) {
-        Game.findById(req.params.id, function(err, game) {
+        Group.findById(req.params.id, function(err, group) {
             if(err) {
                 res.send(err);
             }
-            res.render('./game/edit', { view : { put: true, action: "/games/"+game._id}, game: game });
+            res.render('./group/edit', { view : { put: true, action: "/groups/"+group._id}, game: game });
        		//res.json(game);
         });
     })
     .delete(function(req, res) {
-        Game.remove({
+        Group.remove({
             _id: req.params.id
         }, function(err) {
             if(err) {
