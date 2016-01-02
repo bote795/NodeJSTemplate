@@ -37,8 +37,8 @@ router.route('/games/:id')
                 if(err) {
                     res.send(err);
                 }
-                //res.json(game);
-                res.redirect('./groups')
+                res.json(game);
+                //res.render('/groups')
             });
         });
     })

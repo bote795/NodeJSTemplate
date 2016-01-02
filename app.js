@@ -7,10 +7,13 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var passport = require('passport');
 var LocalStrategy = require ('passport-local').Strategy;
+var methodOverride = require('method-override');
 var routes = require('./routes/index');
 var games = require('./routes/games');
 var groups = require('./routes/groups');
 var app = express();
+//require other models
+var playerRecord = require ('./models/playerRecord');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -21,6 +24,15 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(methodOverride(function(req, res){
+  if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+    // look in urlencoded POST bodies and delete it
+    var method = req.body._method
+    delete req.body._method
+    return method
+  }
+}))
+
 app.use(cookieParser());
 app.use(require('express-session')({
     secret: 'keyboard cat',
@@ -41,10 +53,6 @@ passport.use(new LocalStrategy(Account.authenticate()));
 passport.serializeUser(Account.serializeUser());
 passport.deserializeUser(Account.deserializeUser());
 
-//require other models
-var Game = require('./models/game');
-var Group = require('./models/group');
-var playerRecord = require ('./models/playerRecord');
 //mongoose
 mongoose.connect(process.env.DB ||'mongodb://localhost/gameRecords');
 

@@ -6,8 +6,8 @@ form(role='form', action=""+view.action,method="post", style='max-width: 300px;'
   .form-group
     label.col-lg-2.control-label(for='select')|CO-OP
     select.form-control(name='coop')
-        each val in ['true', 'false']
-            if (game.coop)
+        each val in [true, false]
+            if (game.coop == val)
                 option.selected=val
             else
                 option= val
