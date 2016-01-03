@@ -47,7 +47,7 @@ router.route('/games/:id')
             if(err) {
                 res.send(err);
             }
-            res.render('./game/edit', { view : { put: true, action: "/games/"+game._id}, game: game });
+            res.render('./games/edit', { view : { put: true, action: "/games/"+game._id}, game: game });
        		//res.json(game);
         });
     })

@@ -20,11 +20,25 @@ router.route('/groups')
             if(err) {
                 return res.send(500, err);
             }
-            return res.json(newGroup);
+            //return res.json(newGroup);
+            res.render('./group/', {group: newGroup});
         });
     });
-
-router.route('/group/:id')
+router.route('/groups/new')
+    .get(function(req, res) {       
+        res.render('./group/new', { view : { put: false, action: "/groups"}, group: false});
+    })
+router.route('/groups/:id/edit')
+    .get(function(req, res) {
+        Group.findById(req.params.id, function(err, group) {
+            if(err) {
+                res.send(err);
+            }
+            res.render('./group/edit', { view : { put: true, action: "/groups/"+group._id}, group: group });
+            //res.json(game);
+        });
+    })
+router.route('/groups/:id')
     .put(function(req, res) {
         Group.findById(req.params.id, function(err, group) {
             if(err) {
@@ -38,7 +52,7 @@ router.route('/group/:id')
                     res.send(err);
                 }
                 //res.json(group);
-                res.render('./group',group)
+                res.render('./group',{ group: group})
             });
         });
     })
@@ -47,7 +61,8 @@ router.route('/group/:id')
             if(err) {
                 res.send(err);
             }
-            res.render('./group/edit', { view : { put: true, action: "/groups/"+group._id}, game: game });
+            console.log(group);
+            res.render('./group/', { group: group});
        		//res.json(game);
         });
     })

@@ -1,5 +1,6 @@
-extends layout
+extends ../layout
 
 block content
-  p =group.name
-  p =group.desc
+  p 
+    a(href="/groups/"+group.id+"/edit")=group.name
+  p=group.desc
