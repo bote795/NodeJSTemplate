@@ -1,6 +1,10 @@
 var express = require('express');
 var router = express.Router();
 var Group = require('../models/groups/index');
+var hbs = require('hbs')
+  , fs = require('fs')
+  , form = fs.readFileSync(__dirname + '/../views/group/_form.hbs', 'utf8');
+hbs.registerPartial('formPartial', form); 
 
 router.route('/groups')
     .get(function(req, res) {

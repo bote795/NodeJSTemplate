@@ -8,15 +8,16 @@ var mongoose = require('mongoose');
 var passport = require('passport');
 var LocalStrategy = require ('passport-local').Strategy;
 var methodOverride = require('method-override');
-var expressHbs = require('express3-handlebars');
+var hbs = require('hbs');
 var routes = require('./routes/index');
 var games = require('./routes/games');
 var groups = require('./routes/groups');
 var app = express();
 
 // view engine setup
-app.engine('hbs', expressHbs({extname:'hbs', defaultLayout:'main.hbs'}));
+app.engine('html', hbs.__express);
 app.set('view engine', 'hbs');
+//express automatically adds layout for all the webpages surved
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));

@@ -1,0 +1,32 @@
+<form action="{{view.action}}" role="form" method="post" style="max-width:300px">
+  <div class="form-group">
+    <label for="name">Name</label>
+    <input type="text" class="form-control" name="name" placeholder="name" value="{{game.name}}">
+  </div>
+  <div class="form-group">
+    <label for="Description">Description</label>
+    <input type="text" class="form-control" name="desc" placeholder="name" value="{{game.desc}}">
+  </div>
+  <div class="form-group">
+    <label for="select" class="col-lg-2 control-label">CO-OP</label>
+    <select name="coop" class="form-control">
+        {{#each list}}
+          {{#if game.coop == this}}
+            <options selected="selected">this</options>
+          {{else}}
+            <options>this</options>
+          {{/if}}
+        {{/each}}  
+    </select>
+  </div>
+  {{#if view.put}}
+    <div class="form-group">
+      <input type="hidden" class="form-control" name="_method" value="PUT">
+      </div>  
+  {{/if}}
+  <button type="submit" class='btn btn-default'>Submit</button>
+  <a href="{{view.action}}">
+    <button class="btn btn-primary" type="button">Cancel</button>
+  </a>
+
+</form>
