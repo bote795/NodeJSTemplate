@@ -1,0 +1,14 @@
+{{#unless user}}
+  <a href="/login">Login</a>
+  <br>
+  <a href="/register">Register</a>
+{{/unless}}
+{{#if user}}
+  <p> you are currently logged in as {{username}} </p>
+  <br>
+  {{#groups}}
+    <a href="/groups/"{{_id}}>{{name}}</a>
+    <br>
+  {{/groups}}
+  <a href="/logout">Logout</a>
+{{/if}}

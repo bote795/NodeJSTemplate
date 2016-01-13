@@ -1,0 +1,21 @@
+<div class="container">
+  <h1>Register Page</h1>
+  <p>Sign up for GameRecords</p>
+  <br>
+  <form action="/register'," role="form" method="post'," style="max-width: 300px;">
+    <div class="form-group">
+      <input type="" class="form-control" name="username" placeholder="">
+    </div>
+    <div class="form-group">
+      <input type="" class="form-control" name="username" placeholder="">
+    </div>
+    <button class="btn btn-default" type="submit">Submit</button>
+    <a href="/">
+      <button class="btn btn-primary" type="button">Cancel</button>
+    </a>
+  </form>
+  <br>
+  {{#if err}}
+    <h4>{{err.message}}</h4>
+  {{/if}}
+</div>

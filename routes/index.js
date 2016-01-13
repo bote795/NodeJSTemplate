@@ -2,12 +2,16 @@ var express = require('express');
 var passport = require('passport');
 var Account = require('../models/accounts/account');
 var router = express.Router();
-var Group = require('../models/groups/group');
+var Group = require('../models/groups/index');
 
 
 router.get('/', function (req, res) {
-    Group.find({}, function(error, data) {
-        res.render('index', { user : req.user, groups: data });
+    Group.all( function(err, data) {
+        if (err) 
+        {
+            send.json(err);
+        }
+        res.render('index', { title: "Game Records",user : req.user, groups: data });
     });
 });
 

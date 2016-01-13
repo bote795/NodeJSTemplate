@@ -8,22 +8,22 @@ var mongoose = require('mongoose');
 var passport = require('passport');
 var LocalStrategy = require ('passport-local').Strategy;
 var methodOverride = require('method-override');
+var expressHbs = require('express3-handlebars');
 var routes = require('./routes/index');
 var games = require('./routes/games');
 var groups = require('./routes/groups');
 var app = express();
-//require other models
-var playerRecord = require ('./models/playerRecords/playerRecord');
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.engine('hbs', expressHbs({extname:'hbs', defaultLayout:'main.hbs'}));
+app.set('view engine', 'hbs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+//to be able use PUT and DELETE  in forms
 app.use(methodOverride(function(req, res){
   if (req.body && typeof req.body === 'object' && '_method' in req.body) {
     // look in urlencoded POST bodies and delete it
@@ -35,7 +35,7 @@ app.use(methodOverride(function(req, res){
 
 app.use(cookieParser());
 app.use(require('express-session')({
-    secret: 'keyboard cat',
+    secret: 'keyboard cat', // should be put in env variable
     resave: false,
     saveUninitialized: false
 }));
