@@ -17,7 +17,7 @@ var app = express();
 // view engine setup
 app.engine('html', hbs.__express);
 app.set('view engine', 'hbs');
-//express automatically adds layout for all the webpages surved
+//express automatically adds layout for all the webpages surfed
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));

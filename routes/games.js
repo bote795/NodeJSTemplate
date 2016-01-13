@@ -1,6 +1,10 @@
 var express = require('express');
 var router = express.Router();
 var Game = require('../models/games/index');
+var hbs = require('hbs')
+  , fs = require('fs')
+  , form = fs.readFileSync(__dirname + '/../views/games/_form.hbs', 'utf8');
+hbs.registerPartial('formPartial', form); 
 
 router.route('/games')
     .get(function(req, res) {
