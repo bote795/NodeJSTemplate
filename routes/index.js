@@ -3,13 +3,23 @@ var passport = require('passport');
 var Account = require('../models/accounts/account');
 var router = express.Router();
 var Group = require('../models/groups/index');
+var multer = require('multer');
 
+var uploading = multer({
+  dest: __dirname + '/../public/uploads/',
+  limits: {fileSize: 1000000, files:1},
+});
 
+router.post('/upload', uploading.single('image'), function(req, res) {
+    res.json(req.file);
+    console.loge(req.file);
+    console.log("uploaded?");
+});
 router.get('/', function (req, res) {
     Group.all( function(err, data) {
         if (err) 
         {
-            send.json(err);
+            res.json(err);
         }
         res.render('index', { title: "Game Records",user : req.user, groups: data });
     });

@@ -14,6 +14,11 @@
       <button class="btn btn-primary" type="button">Cancel</button>
     </a>
   </form>
+  <form action="/upload" method="POST" enctype="multipart/form-data">
+    Select an image to upload:
+    <input type="file" name="image"> 
+    <input type="submit" value="Upload Image">
+  </form>
   <br>
   {{#if err}}
     <h4>{{err.message}}</h4>
