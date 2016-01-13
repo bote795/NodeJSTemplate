@@ -1,8 +1,8 @@
 var express = require('express');
 var passport = require('passport');
-var Account = require('../models/account');
+var Account = require('../models/accounts/account');
 var router = express.Router();
-var Group = require('../models/group');
+var Group = require('../models/groups/group');
 
 
 router.get('/', function (req, res) {

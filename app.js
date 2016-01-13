@@ -13,7 +13,7 @@ var games = require('./routes/games');
 var groups = require('./routes/groups');
 var app = express();
 //require other models
-var playerRecord = require ('./models/playerRecord');
+var playerRecord = require ('./models/playerRecords/playerRecord');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -48,7 +48,7 @@ app.use('/', groups);
 app.use('/', games);
 
 //passport config
-var Account = require('./models/account');
+var Account = require('./models/accounts/account');
 passport.use(new LocalStrategy(Account.authenticate()));
 passport.serializeUser(Account.serializeUser());
 passport.deserializeUser(Account.deserializeUser());
