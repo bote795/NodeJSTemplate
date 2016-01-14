@@ -5,7 +5,9 @@ var Account = new Schema({
     username: String,
     password: String,
     email: String,
-    image: String,
+    image: { 
+     	type: mongoose.Schema.Types.ObjectId, 
+     	ref: 'Image'},
     bio: String,
 	following: [{userId: String}],
 	followers: [{userId: String}]

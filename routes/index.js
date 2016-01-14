@@ -1,6 +1,7 @@
 var express = require('express');
 var passport = require('passport');
 var Account = require('../models/accounts/account');
+var User = require('../models/accounts/index');
 var router = express.Router();
 var Group = require('../models/groups/index');
 var multer = require('multer');
@@ -10,11 +11,7 @@ var uploading = multer({
   limits: {fileSize: 1000000, files:1},
 });
 
-router.post('/upload', uploading.single('image'), function(req, res) {
-    res.json(req.file);
-    console.loge(req.file);
-    console.log("uploaded?");
-});
+
 router.get('/', function (req, res) {
     Group.all( function(err, data) {
         if (err) 
@@ -29,8 +26,8 @@ router.get('/register', function(req, res) {
     res.render('register', { });
 });
 
-router.post('/register', function(req, res) {
-    Account.register(new Account({ username : req.body.username }), req.body.password, function(err, account) {
+router.post('/register', uploading.single('image'), function(req, res) {
+    User.create(req, function(err, account) {
         if (err) {
 	    console.log(err);
             return res.render('register', { account : account , err : err });
