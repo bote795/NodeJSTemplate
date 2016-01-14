@@ -12,6 +12,7 @@ var hbs = require('hbs');
 var routes = require('./routes/index');
 var games = require('./routes/games');
 var groups = require('./routes/groups');
+var images = require('./routes/images');
 var app = express();
 
 // view engine setup
@@ -47,6 +48,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', routes);
 app.use('/', groups);
 app.use('/', games);
+app.use('/', images);
 
 //passport config
 var Account = require('./models/accounts/account');

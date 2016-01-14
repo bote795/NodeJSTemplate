@@ -18,6 +18,7 @@ router.get('/', function (req, res) {
         {
             res.json(err);
         }
+        console.log(req.user);
         res.render('index', { title: "Game Records",user : req.user, groups: data });
     });
 });
