@@ -20,17 +20,7 @@ router.route('/images')
             return res.json(newImage);
         });
     });
-
 router.route('/images/:id')
-    .put(function(req, res) {
-        Image.put(req,function(err, image) {
-                if(err) {
-                    res.send(err);
-                }
-                res.json(image);
-                //res.render('/groups')
-            });
-    })
     .get(function(req, res) {
         Image.get(req.params.id, function(err, image) {
             if(err) {
@@ -43,12 +33,20 @@ router.route('/images/:id')
         });
     })
     .delete(function(req, res) {
-      Image.delete(req.params.id, function(err){
-        if (err) {
-            res.send(err);
-        }
-        res.json('Deleted!');
-      });
+        Image.get(req.params.id, function(err, image) {  
+            if (err) {
+                res.send(err);
+            }         
+            fs.unlinkSync(image.path);
+          Image.delete(req.params.id, function(err){
+            if (err) {
+                res.send(err);
+            }
+            
+            res.json('Deleted!');
+          });
+            
+       });
     });
 //if ever wanted to download
 //res.download('/path/to/file.ext', 'newname.ext');

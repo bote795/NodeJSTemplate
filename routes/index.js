@@ -39,7 +39,16 @@ router.post('/register', uploading.single('image'), function(req, res) {
         });
     });
 });
-
+router.get('/edit',function(req, res) {
+    res.render('edit', { user : req.user });
+});
+router.post('/edit',function(req, res) {
+    User.put(req,function (err,user) {
+        console.log(user);
+        console.log(req.user);
+        res.render('edit', { user : req.user });
+    })
+});
 router.get('/login', function(req, res) {
     res.render('login', { user : req.user });
 });

@@ -22,6 +22,14 @@ module.exports = {
             if(err) {
                 cb(err);
             }
+            if (!image) {
+                var error= new Error("Image not found");
+                error.type="image";
+                error.http_code = 404;
+                error.arguments ={id: id};
+                error.message="Image not found";
+                cb(error);
+            }
           cb(null, image);
         });
 	},
