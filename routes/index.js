@@ -10,7 +10,11 @@ var uploading = multer({
   dest: __dirname + '/../public/uploads/',
   limits: {fileSize: 1000000, files:1},
 });
-
+/*
+uploading.single('image') = used when form has a file
+image is the name of the field of the file
+TODO: need to confirm that file is an image
+*/
 
 router.get('/', function (req, res) {
     Group.all( function(err, data) {
@@ -40,11 +44,18 @@ router.post('/register', uploading.single('image'), function(req, res) {
 router.get('/edit',function(req, res) {
     res.render('edit', { user : req.user });
 });
-router.post('/edit',function(req, res) {
+
+router.post('/edit', uploading.single('image'), function(req, res) {
+    console.log(req.body);
     User.put(req,function (err,user) {
         console.log(user);
         console.log(req.user);
-        res.render('edit', { user : req.user });
+        //refresh user data for session (passport)
+        req.login(user, function(err) {
+            if (err) return next(err)
+
+            res.render('edit', { user : req.user });
+        })
     })
 });
 router.get('/login', function(req, res) {

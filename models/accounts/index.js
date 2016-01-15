@@ -1,6 +1,7 @@
 var User = require('./account');
 var Image = require('../images/index');
 var debug = require('debug')('accounts');
+var fields= ["email","bio"]; 
 //registers the user so we don't have to re-write this code in create
 var subcreate=function (newUser, req,cb) {
 	User.register(newUser, req.body.password, function(err, newUser) {
@@ -13,6 +14,9 @@ var subcreate=function (newUser, req,cb) {
 	});
 };
 module.exports = {
+	/*
+	TODO set a default pic
+	*/
 	create: function (req, cb) {
 		var newUser = new User({ username : req.body.username });
 		//if passing image when registering
@@ -71,36 +75,39 @@ module.exports = {
         });
 	},
 	put: function (req, cb) {
-		User.findById(req.params.id, function(err, user) {
-            if(err) {
-                cb(err);
-            }
-	        user.email = req.body.email;
-	        user.bio = req.body.bio;
-            if ('file' in req) 
-            {
-            	//doing save inside Image since its async
-            	Image.create(req,function (err,newImage) {
-            		user.image = newImage._id;
-			      	user.save(function(err, user) {
-		                if(err) {
-		                    cb(err);
-		                }
-		                cb(null,user);
-		            });
-            	});
-            }
-            else
-            {
-		      	user.save(function(err, user) {
+		var newFields={};
+		var options = {new: true};
+		//add fields that are in req.body aka from form
+		//so that we can update those if they are not in the object
+		//or just update
+		for (var i = 0; i < fields.length; i++) {
+			if(req.body[fields[i]].trim())
+			{
+				newFields[fields[i]]=req.body[fields[i]].trim();
+			}
+		};
+        if ('file' in req) 
+        {
+        	//doing save inside Image since its async
+        	Image.create(req,function (err,newImage) {
+        		newFields["image"]=newImage._id;
+		      	User.findOneAndUpdate({_id: req.user._id}, newFields,options, function(err, user) {
 	                if(err) {
 	                    cb(err);
 	                }
 	                cb(null,user);
 	            });
-            }
-
-        });
+        	});
+        }
+        else
+        {
+	      	User.findOneAndUpdate({_id: req.user._id}, newFields,options, function(err, user) {
+	            if(err) {
+	                cb(err);
+	            }
+	            cb(null,user);
+	        });
+        }
 	},
 	delete: function (id, cb) {
 		  User.remove({
