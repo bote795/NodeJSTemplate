@@ -45,15 +45,14 @@ router.get('/edit',function(req, res) {
     res.render('edit', { user : req.user });
 });
 
+//route to change user information
 router.post('/edit', uploading.single('image'), function(req, res) {
     console.log(req.body);
     User.put(req,function (err,user) {
-        console.log(user);
-        console.log(req.user);
+
         //refresh user data for session (passport)
         req.login(user, function(err) {
             if (err) return next(err)
-
             res.render('edit', { user : req.user });
         })
     })
