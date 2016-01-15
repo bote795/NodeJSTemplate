@@ -10,11 +10,11 @@ module.exports = {
         for (var i = 0; i < imageFields.length; i++) {
              newImage[imageFields[i]] = req.file[imageFields[i]];
          };
-        newImage.save(function(err, newImage) {
+        newImage.save(function(err, image) {
             if(err) {
                 cb(err);
             }
-            cb(null, newImage);
+            cb(null, image);
         });
 	}, //close create
 	get: function (id, cb) {

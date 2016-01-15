@@ -18,7 +18,6 @@ router.get('/', function (req, res) {
         {
             res.json(err);
         }
-        console.log(req.user);
         res.render('index', { title: "Game Records",user : req.user, groups: data });
     });
 });
@@ -30,7 +29,6 @@ router.get('/register', function(req, res) {
 router.post('/register', uploading.single('image'), function(req, res) {
     User.create(req, function(err, account) {
         if (err) {
-	    console.log(err);
             return res.render('register', { account : account , err : err });
         }
 
