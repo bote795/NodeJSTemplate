@@ -49,7 +49,6 @@ app.use('/', routes);
 app.use('/', groups);
 app.use('/', games);
 app.use('/', images);
-
 //passport config
 var Account = require('./models/accounts/account');
 passport.use(new LocalStrategy(Account.authenticate()));

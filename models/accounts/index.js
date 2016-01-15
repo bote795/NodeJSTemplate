@@ -109,6 +109,19 @@ module.exports = {
 	        });
         }
 	},
+	putPass: function(id,pass,cb) {
+		User.findById(id ,function(err, user){
+		 	if (err) {
+		 		cb(err);
+		 	};
+		    if (user){
+		        user.setPassword(pass, function(){
+		            user.save();
+		            cb(null);
+		        });
+		    } 
+		});
+	},
 	delete: function (id, cb) {
 		  User.remove({
             _id: id

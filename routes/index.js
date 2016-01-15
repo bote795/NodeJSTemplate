@@ -41,22 +41,69 @@ router.post('/register', uploading.single('image'), function(req, res) {
         });
     });
 });
-router.get('/edit',function(req, res) {
-    res.render('edit', { user : req.user });
-});
-
-//route to change user information
-router.post('/edit', uploading.single('image'), function(req, res) {
-    console.log(req.body);
-    User.put(req,function (err,user) {
-
-        //refresh user data for session (passport)
-        req.login(user, function(err) {
-            if (err) return next(err)
-            res.render('edit', { user : req.user });
-        })
+router.route('/edit')
+    .get(function(req, res) {
+        res.render('edit', { user : req.user });
     })
-});
+    //route to change user information
+    .post(uploading.single('image'), function(req, res) {
+        console.log(req.body);
+        User.put(req,function (err,user) {
+
+            //refresh user data for session (passport)
+            req.login(user, function(err) {
+                if (err) return next(err)
+                res.render('edit', { user : req.user });
+            })
+        })
+    });
+router.route('/editPass') 
+    .get(function (req,  res) {
+            res.render('editPass', {});
+    }) 
+    /*
+    Todo need to check on client side 
+        size and passwords match
+    Do length check must be bigger than X
+    */
+    .post(function(req, res) {
+        var pas1 = req.body.password.trim();
+        var pas2 = req.body.password2.trim();
+        var flash={};
+        //if both fields contian something 
+        //and they are the same
+        if (pas1 && pas2 && (pas1 == pas2))
+        {
+            User.putPass(req.user._id, pas1,function (err) {
+                if (err) 
+                {
+                    flash = {
+                    type: 'error',
+                    message: err
+                    };
+                    //res.send(err);
+                }
+                flash = {
+                    type: 'success',
+                    message: 'Password Change successful!'
+                };
+                    res.render('editPass',{sessionFlash: flash })
+            })
+            
+        }
+        else
+        {
+            flash = {
+                    type: 'error',
+                    message: "Mess"
+            };
+            res.render('editPass',{sessionFlash: flash })
+
+        }
+
+
+    });
+
 router.get('/login', function(req, res) {
     res.render('login', { user : req.user });
 });
