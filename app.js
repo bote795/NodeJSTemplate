@@ -13,6 +13,7 @@ var routes = require('./routes/index');
 var games = require('./routes/games');
 var groups = require('./routes/groups');
 var images = require('./routes/images');
+
 var app = express();
 
 // view engine setup

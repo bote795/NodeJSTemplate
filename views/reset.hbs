@@ -1,0 +1,23 @@
+<div class="container">
+	<h1>Reset Password</h1>
+	{{#if sessionFlash.message}}
+	    <div class="{{ sessionFlash.type }}">
+	        <strong>{{ sessionFlash.message }}</strong> 
+	    </div>
+	{{/if}}
+	<form role="form" method="post" style="max-width: 300px;">
+		<div class="form-group">
+			<label for="password">new Password</label>
+			<input type="password" name="password" class="form-control">
+		</div>
+		<div class="form-group">
+			<label for="password">Confirm Password</label>
+			<input type="password" name="password2"class="form-control">
+		</div>
+		<button class="btn btn-default" type="submit">Submit</button>
+		<a href="/">
+			<button type="button" class="btn btn-primary">Cancel</button>
+		</a>	
+	</form>											
+
+</div>

@@ -9,14 +9,20 @@ var async = require("async"),
     crypto = require("crypto"),
     nodemailer = require("nodemailer"),
     mg = require('nodemailer-mailgun-transport');
-
-var auth = {
-  auth: {
-    api_key: 'key-2348dc1601b3540c6ca6aa3ddf4ab690',
-    domain: 'sandbox2bd9275129b64f1ca8032cc5dbe6b63b.mailgun.org'
+var env = require('node-env-file');
+ // Load any undefined ENV variables from a specified file.
+env(__dirname+"/.." + '/.env');
+var email = process.env.EMAIL;
+var emailPass = process.env.PASS;
+var configsMail = {
+    service: "Hotmail",
+    auth: {
+    user:  email,
+    pass: emailPass
   }
-};
-var nodemailerMailgun = nodemailer.createTransport(mg(auth));
+}
+
+var nodemailerMailgun = nodemailer.createTransport(configsMail);
 
 
 var uploading = multer({
@@ -187,13 +193,13 @@ router.route('/forgot')
         }
       ], function(err) {
         if (err) return res.json(err);
-        res.redirect('/forgot', {});
+        res.render('forgot', {});
       });        
 
     });
 router.route('/reset/:token')
     .get(function(req, res) {
-      User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, function(err, user) {
+      Account.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, function(err, user) {
         if (!user) {
           req.flash('error', 'Password reset token is invalid or has expired.');
           return res.redirect('/forgot');
@@ -206,31 +212,29 @@ router.route('/reset/:token')
     .post(function(req, res) {
       async.waterfall([
         function(done) {
-          Account.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, function(err, user) {
+          Account.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, 
+            function(err, user) {
             if (!user) {
-              req.flash('error', 'Password reset token is invalid or has expired.');
+              //req.flash('error', 'Password reset token is invalid or has expired.');
               return res.redirect('back');
             }
 
-            user.password = req.body.password;
-            user.resetPasswordToken = undefined;
-            user.resetPasswordExpires = undefined;
+            user.setPassword(req.body.password, function () {
+                user.resetPasswordToken = undefined;
+                user.resetPasswordExpires = undefined;
 
-            user.save(function(err) {
-              req.logIn(user, function(err) {
-                done(err, user);
-              });
+                user.save(function(err) {
+                  req.logIn(user, function(err) {
+                    done(err, user);
+                  });
+                });
             });
+
+
           });
         },
         function(user, done) {
-          var smtpTransport = nodemailer.createTransport('SMTP', {
-            service: 'Mailgun',
-            auth: {
-              user: smtpUser,
-              pass: smtpPass
-            }
-          });
+
           var mailOptions = {
             to: user.email,
             from: 'passwordreset@demo.com',
@@ -238,9 +242,19 @@ router.route('/reset/:token')
             text: 'Hello,\n\n' +
               'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
           };
-          smtpTransport.sendMail(mailOptions, function(err) {
-            req.flash('success', 'Success! Your password has been changed.');
-            done(err);
+          nodemailerMailgun.sendMail(mailOptions, function(err, info) {
+            //req.flash('success', 'Success! Your password has been changed.');
+           if (err) 
+            {
+                console.log("Error");
+                console.log(err);
+            }
+            else
+            {
+                console.log('An e-mail has been sent to ' + user.email + ' with further instructions.');
+                console.log('Response' + info);
+            }
+            done(err, 'done');
           });
         }
       ], function(err) {
