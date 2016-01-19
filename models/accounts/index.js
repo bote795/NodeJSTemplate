@@ -18,7 +18,7 @@ module.exports = {
 	TODO set a default pic
 	*/
 	create: function (req, cb) {
-		var newUser = new User({ username : req.body.username });
+		var newUser = new User({ username : req.body.username, email: req.body.email });
 		//if passing image when registering
 		if ('file' in req) 
 		{
