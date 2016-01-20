@@ -13,6 +13,14 @@ var subcreate=function (newUser, req,cb) {
         cb(null, newUser);
 	});
 };
+var findByTokenExpire=function (token, cb) {
+	  User.findOne({ resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } }, function(err, user) {
+        if (!user) {
+          cb(err);
+        }
+        cb(null,user);
+      });
+};
 module.exports = {
 	/*
 	TODO set a default pic
@@ -129,6 +137,46 @@ module.exports = {
             if(err) {
                 cb(err);
             }
+        });
+	},
+	//functions for recovery pass
+	/*
+		Function to find by email and set new Token
+	*/
+	findByEmailToken: function(email, token, cb) {
+      User.findOne({ email: email }, function(err, user) {
+        if (!user) {
+          //req.flash('error', 'No account with that email address exists.');
+          //return res.redirect('/forgot');
+          cb(err);
+        }
+
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+
+        user.save(function(err) {
+          cb(err, token, user);
+        });
+      });
+	},
+	findByTokenExpire: findByTokenExpire,
+
+	resetPassword: function (token, password, cb) {
+		findByTokenExpire(token,function (err,user) {
+			if (err) {
+				cb(err);
+			}
+			user.setPassword(password, function () {
+	            user.resetPasswordToken = undefined;
+	            user.resetPasswordExpires = undefined;
+
+	            user.save(function(err) {
+	            	if (err) {
+	            		cb(err);
+	            	};
+	                cb(null,user);
+	              });
+            });
         });
 	}
 } 

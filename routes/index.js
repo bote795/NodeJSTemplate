@@ -150,19 +150,11 @@ router.route('/forgot')
           });
         },
         function(token, done) {
-          Account.findOne({ email: req.body.email }, function(err, user) {
-            if (!user) {
-              //req.flash('error', 'No account with that email address exists.');
-              //return res.redirect('/forgot');
+          User.findByEmailToken(req.body.email, token,function(err,token,user) {
+            if (err) {
               return res.send(err);
-            }
-
-            user.resetPasswordToken = token;
-            user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-
-            user.save(function(err) {
-              done(err, token, user);
-            });
+            };
+            done(err, token, user);
           });
         },
         function(token, user, done) {
@@ -199,38 +191,28 @@ router.route('/forgot')
     });
 router.route('/reset/:token')
     .get(function(req, res) {
-      Account.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, function(err, user) {
-        if (!user) {
-          req.flash('error', 'Password reset token is invalid or has expired.');
-          return res.redirect('/forgot');
-        }
+      User.findByTokenExpire(req.params.token, function (err, user) {
+        if (err) {
+          res.json(err);
+        };
         res.render('reset', {
           user: req.user
         });
-      });
+      })
     })
     .post(function(req, res) {
       async.waterfall([
         function(done) {
-          Account.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, 
-            function(err, user) {
-            if (!user) {
-              //req.flash('error', 'Password reset token is invalid or has expired.');
+          User.resetPassword(req.params.token, req.body.password, function (err, user) {
+            if (err) {
               return res.redirect('back');
-            }
-
-            user.setPassword(req.body.password, function () {
-                user.resetPasswordToken = undefined;
-                user.resetPasswordExpires = undefined;
-
-                user.save(function(err) {
-                  req.logIn(user, function(err) {
-                    done(err, user);
-                  });
-                });
+            };
+            req.logIn(user, function(err) {
+                if (err) {
+                  return res.redirect('back');
+                };
+                done(null, user);
             });
-
-
           });
         },
         function(user, done) {
