@@ -8,10 +8,21 @@ var multer = require('multer');
 var async = require("async"),
     crypto = require("crypto"),
     nodemailer = require("nodemailer"),
-    mg = require('nodemailer-mailgun-transport');
-var env = require('node-env-file');
+    mg = require('nodemailer-mailgun-transport'),
+    hbs = require('nodemailer-express-handlebars'),
+    env = require('node-env-file');
  // Load any undefined ENV variables from a specified file.
 env(__dirname+"/.." + '/.env');
+  var options = {
+     viewEngine: {
+         extname: '.hbs',
+         layoutsDir: 'views/email/',
+         defaultLayout : 'forgotePass',
+         partialsDir : 'views/email/partials/'
+     },
+     viewPath: 'views/email/',
+     extName: '.hbs'
+ };
 var email = process.env.EMAIL;
 var emailPass = process.env.PASS;
 var configsMail = {
@@ -158,15 +169,16 @@ router.route('/forgot')
           });
         },
         function(token, user, done) {
-
+          nodemailerMailgun.use('compile',hbs(options));
           var mailOptions = {
             to: user.email,
             from: 'passwordreset@demo.com',
             subject: 'Node.js Password Reset',
-            text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
-              'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-              'http://' + req.headers.host + '/reset/' + token + '\n\n' +
-              'If you did not request this, please ignore this email and your password will remain unchanged.\n'
+            template: 'forgotePass',
+            context: {
+              host: req.headers.host,
+              token: token
+            }
           };
           nodemailerMailgun.sendMail(mailOptions, function(err,info) {
             //req.flash('info', 'An e-mail has been sent to ' + user.email + ' with further instructions.');
@@ -192,8 +204,9 @@ router.route('/forgot')
 router.route('/reset/:token')
     .get(function(req, res) {
       User.findByTokenExpire(req.params.token, function (err, user) {
-        if (err) {
-          res.json(err);
+        if (!user) {
+          //'Password reset token is invalid or has expired.
+          return res.redirect('/forgot');
         };
         res.render('reset', {
           user: req.user

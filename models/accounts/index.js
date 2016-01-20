@@ -16,7 +16,7 @@ var subcreate=function (newUser, req,cb) {
 var findByTokenExpire=function (token, cb) {
 	  User.findOne({ resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } }, function(err, user) {
         if (!user) {
-          cb(err);
+          return cb(err);
         }
         cb(null,user);
       });
@@ -69,7 +69,7 @@ module.exports = {
 	get: function (id, cb) {
 		User.findById(id, function(err, user) {
             if(err) {
-                cb(err);
+                return cb(err);
             }
           cb(null, user);
         });
@@ -120,7 +120,7 @@ module.exports = {
 	putPass: function(id,pass,cb) {
 		User.findById(id ,function(err, user){
 		 	if (err) {
-		 		cb(err);
+		 		return cb(err);
 		 	};
 		    if (user){
 		        user.setPassword(pass, function(){
@@ -135,7 +135,7 @@ module.exports = {
             _id: id
         }, function(err) {
             if(err) {
-                cb(err);
+                return cb(err);
             }
         });
 	},
@@ -148,7 +148,7 @@ module.exports = {
         if (!user) {
           //req.flash('error', 'No account with that email address exists.');
           //return res.redirect('/forgot');
-          cb(err);
+          return cb(err);
         }
 
         user.resetPasswordToken = token;
@@ -164,7 +164,7 @@ module.exports = {
 	resetPassword: function (token, password, cb) {
 		findByTokenExpire(token,function (err,user) {
 			if (err) {
-				cb(err);
+				return cb(err);
 			}
 			user.setPassword(password, function () {
 	            user.resetPasswordToken = undefined;
