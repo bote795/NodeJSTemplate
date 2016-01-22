@@ -13,16 +13,6 @@ var async = require("async"),
     env = require('node-env-file');
  // Load any undefined ENV variables from a specified file.
 env(__dirname+"/.." + '/.env');
-  var options = {
-     viewEngine: {
-         extname: '.hbs',
-         layoutsDir: 'views/email/',
-         defaultLayout : 'forgotePass',
-         partialsDir : 'views/email/partials/'
-     },
-     viewPath: 'views/email/',
-     extName: '.hbs'
- };
 var email = process.env.EMAIL;
 var emailPass = process.env.PASS;
 var configsMail = {
@@ -169,6 +159,16 @@ router.route('/forgot')
           });
         },
         function(token, user, done) {
+            var options = {
+             viewEngine: {
+                 extname: '.hbs',
+                 layoutsDir: 'views/email/',
+                 defaultLayout : 'forgotePass',
+                 partialsDir : 'views/email/partials/'
+             },
+             viewPath: 'views/email/',
+             extName: '.hbs'
+         };
           nodemailerMailgun.use('compile',hbs(options));
           var mailOptions = {
             to: user.email,
@@ -229,14 +229,26 @@ router.route('/reset/:token')
           });
         },
         function(user, done) {
-
+            var options = {
+               viewEngine: {
+                   extname: '.hbs',
+                   layoutsDir: 'views/email/',
+                   defaultLayout : 'confirmationReset',
+                   partialsDir : 'views/email/partials/'
+               },
+               viewPath: 'views/email/',
+               extName: '.hbs'
+           };
+          nodemailerMailgun.use('compile',hbs(options));
           var mailOptions = {
             to: user.email,
             from: 'passwordreset@demo.com',
             subject: 'Your password has been changed',
-            text: 'Hello,\n\n' +
-              'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
-          };
+            template: 'confirmationReset',
+            context: {
+              email: user.email
+            }
+            };
           nodemailerMailgun.sendMail(mailOptions, function(err, info) {
             //req.flash('success', 'Success! Your password has been changed.');
            if (err) 
