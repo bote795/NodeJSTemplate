@@ -13,6 +13,7 @@ var routes = require('./routes/index');
 var games = require('./routes/games');
 var groups = require('./routes/groups');
 var images = require('./routes/images');
+var flash = require('express-flash');
 
 var app = express();
 
@@ -42,6 +43,7 @@ app.use(require('express-session')({
     resave: false,
     saveUninitialized: false
 }));
+app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));

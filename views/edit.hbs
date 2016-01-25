@@ -1,5 +1,8 @@
 <div class="container">
 	<h1>Edit Profile</h1>
+	{{#if expressFlash}}
+	    <p><strong>{{ expressFlash }}</strong></p>
+	{{/if}}
 	<form action="/edit" role="form" method="post" enctype="multipart/form-data" style="max-width: 300px;">
 		<div class="form-group">
 			<label for="email">Email</label>

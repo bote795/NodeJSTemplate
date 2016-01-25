@@ -51,6 +51,7 @@ router.get('/register', function(req, res) {
 });
 
 router.post('/register', uploading.single('image'), function(req, res) {
+
     User.create(req, function(err, account) {
         if (err) {
             return res.render('register', { account : account , err : err });
@@ -73,7 +74,9 @@ router.route('/edit')
             //refresh user data for session (passport)
             req.login(user, function(err) {
                 if (err) return next(err)
-                res.render('edit', { user : req.user });
+                req.flash('success', "Successfuly Changed Data");  
+                res.render('edit', { user : req.user , 
+                  expressFlash: req.flash('success')});
             })
         })
     });
@@ -97,27 +100,19 @@ router.route('/editPass')
             User.putPass(req.user._id, pas1,function (err) {
                 if (err) 
                 {
-                    flash = {
-                    type: 'error',
-                    message: err
-                    };
-                    //res.send(err);
+                    req.flash('error',"An error occurred");
+                    res.render('editPass',{expressFlash: req.flash('error') })
                 }
-                flash = {
-                    type: 'success',
-                    message: 'Password Change successful!'
-                };
-                    res.render('editPass',{sessionFlash: flash })
+                  req.flash('success',"Password Change successful!");
+                  res.render('editPass',{expressFlash: req.flash('success')})
             })
             
         }
         else
         {
-            flash = {
-                    type: 'error',
-                    message: "Mess"
-            };
-            res.render('editPass',{sessionFlash: flash })
+
+            req.flash('error',"An error occurred");
+            res.render('editPass',{expressFlash: req.flash('error') })
         }
     });
 
@@ -205,9 +200,10 @@ router.route('/reset/:token')
     .get(function(req, res) {
       User.findByTokenExpire(req.params.token, function (err, user) {
         if (!user) {
-          //'Password reset token is invalid or has expired.
-          return res.redirect('/forgot');
-        };
+          //'Password reset token is invalid or has expired..
+          req.flash('error', "password token is invalid or old");
+          return res.redirect('/forgot', {expressFlash: req.flash('error')});
+        };      
         res.render('reset', {
           user: req.user
         });
@@ -218,6 +214,7 @@ router.route('/reset/:token')
         function(done) {
           User.resetPassword(req.params.token, req.body.password, function (err, user) {
             if (err) {
+              req.flash('error',"Token was invalid");
               return res.redirect('back');
             };
             req.logIn(user, function(err) {
@@ -254,11 +251,13 @@ router.route('/reset/:token')
            if (err) 
             {
                 console.log("Error");
+                req.flash('error',"An error occurred");
                 console.log(err);
             }
             else
             {
                 console.log('An e-mail has been sent to ' + user.email + ' with further instructions.');
+                req.flash('success', 'An e-mail has been sent to ' + user.email + ' with further instructions.');
                 console.log('Response' + info);
             }
             done(err, 'done');
