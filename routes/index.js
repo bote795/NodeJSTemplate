@@ -117,10 +117,10 @@ router.route('/editPass')
     });
 
 router.get('/login', function(req, res) {
-    res.render('login', { user : req.user });
+    res.render('login', { user : req.user,  expressFlash:req.flash('error')});
 });
 
-router.post('/login', passport.authenticate('local'), function(req, res) {
+router.post('/login', passport.authenticate('local',{ failureRedirect: '/login',failureFlash: true  }), function(req, res) {
     res.redirect('/');
 });
 
@@ -135,7 +135,7 @@ router.get('/ping', function(req, res){
 
 router.route('/forgot')
     .get(function (req,res) {
-        res.render('forgot',{});
+        res.render('forgot',{expressFlash: req.flash("error")});
     })
     .post(function(req, res) {
         async.waterfall([
@@ -148,7 +148,8 @@ router.route('/forgot')
         function(token, done) {
           User.findByEmailToken(req.body.email, token,function(err,token,user) {
             if (err) {
-              return res.send(err);
+              req.flash('error', "Token or email not found")
+              return res.render('forgot', {expressFlash: req.flash("error")});
             };
             done(err, token, user);
           });
@@ -179,11 +180,13 @@ router.route('/forgot')
             //req.flash('info', 'An e-mail has been sent to ' + user.email + ' with further instructions.');
             if (err) 
             {
+               req.flash('error', "Error with sending Email")
                 console.log("Error");
                 console.log(err);
             }
             else
             {
+                req.flash('success', 'An e-mail has been sent to ' + user.email + ' with further instructions.');
                 console.log('An e-mail has been sent to ' + user.email + ' with further instructions.');
                 console.log('Response' + info);
             }
@@ -191,8 +194,8 @@ router.route('/forgot')
           });
         }
       ], function(err) {
-        if (err) return res.json(err);
-        res.render('forgot', {});
+        if (err) return res.render('forgot', {expressFlash: req.flash("error")});;
+        res.render('forgot', {expressFlash: req.flash("success")});
       });        
 
     });
