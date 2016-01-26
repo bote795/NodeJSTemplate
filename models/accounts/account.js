@@ -9,6 +9,9 @@ var Account = new Schema({
      	type: mongoose.Schema.Types.ObjectId, 
      	ref: 'Image'},
     bio: String,
+    avatars : [{ 
+     	type: mongoose.Schema.Types.ObjectId, 
+     	ref: 'Image'}],
 	following: [{userId: String}],
 	followers: [{userId: String}],
 	resetPasswordToken: String,

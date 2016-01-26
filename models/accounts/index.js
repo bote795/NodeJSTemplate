@@ -6,9 +6,9 @@ var fields= ["email","bio"];
 var subcreate=function (newUser, req,cb) {
 	User.register(newUser, req.body.password, function(err, newUser) {
         if (err) {
-        	req.flash('error',err);
-	    console.log(err);
-            cb(err);
+        	req.flash('error',err.message);
+	    	debug(err);
+            return cb(err);
         }
 
         cb(null, newUser);
@@ -25,6 +25,7 @@ var findByTokenExpire=function (token, cb) {
 module.exports = {
 	/*
 	TODO set a default pic
+		call to create a new User
 	*/
 	create: function (req, cb) {
 		var newUser = new User({ username : req.body.username, email: req.body.email });
@@ -38,15 +39,16 @@ module.exports = {
 				debug("Image created");
 				subcreate(newUser,req,function (err,newUser) {
 					if (err) 
-					{
-						cb(err);
+					{	req.flash("error",err.message);
+						return cb(err);
 					}
 					//saves imadeid to newuser
 					newUser.image=newImage._id;
+					newUser.avatars=[newImage._id];
 					//save user
 					newUser.save(function(err, user) {
 		                if(err) {
-		                    cb(err);
+		                    return cb(err);
 		                }
 		                cb(null,user);
 		            });
@@ -60,13 +62,14 @@ module.exports = {
 			subcreate(newUser,req,function (err,newUser) {
 				if (err) 
 				{
-					cb(err);
+					return cb(err);
 				}
 				cb(null, newUser);
 			});
 		}
 
 	}, //close create
+	//retrieves one user by id
 	get: function (id, cb) {
 		User.findById(id, function(err, user) {
             if(err) {
@@ -75,10 +78,11 @@ module.exports = {
           cb(null, user);
         });
 	},
+	//retrieves all users
 	all: function (cb) {
 		User.find(function(err, users) {
             if(err) {
-                cb(err);
+                return cb(err);
             }
           cb(null, users);
         });
@@ -95,29 +99,37 @@ module.exports = {
 				newFields[fields[i]]=req.body[fields[i]].trim();
 			}
 		};
+		//if a file is being passed
+		//create file then save it along with other fields
         if ('file' in req) 
         {
         	//doing save inside Image since its async
         	Image.create(req,function (err,newImage) {
         		newFields["image"]=newImage._id;
+        		newFields["$push"]={avatars: newImage._id};
 		      	User.findOneAndUpdate({_id: req.user._id}, newFields,options, function(err, user) {
 	                if(err) {
-	                    cb(err);
+	                    return cb(err);
 	                }
 	                cb(null,user);
 	            });
         	});
         }
+        //no file was sent just update other fields
         else
         {
 	      	User.findOneAndUpdate({_id: req.user._id}, newFields,options, function(err, user) {
 	            if(err) {
-	                cb(err);
+	                return cb(err);
 	            }
 	            cb(null,user);
 	        });
         }
 	},
+	/*
+		update pasword
+		user.setPassword calls passport password to hash and salt
+	*/
 	putPass: function(id,pass,cb) {
 		User.findById(id ,function(err, user){
 		 	if (err) {
@@ -147,9 +159,8 @@ module.exports = {
 	findByEmailToken: function(email, token, cb) {
       User.findOne({ email: email }, function(err, user) {
         if (!user) {
-          //req.flash('error', 'No account with that email address exists.');
-          //return res.redirect('/forgot');
-          return cb(err);
+          req.flash('error', 'No account with that email address exists.');
+          return res.redirect('/forgot', { expressFlash : req.flash('error')});
         }
 
         user.resetPasswordToken = token;
@@ -173,7 +184,7 @@ module.exports = {
 
 	            user.save(function(err) {
 	            	if (err) {
-	            		cb(err);
+	            		return cb(err);
 	            	};
 	                cb(null,user);
 	              });

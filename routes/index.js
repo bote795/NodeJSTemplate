@@ -55,7 +55,7 @@ router.get('/', function (req, res) {
 });
 
 router.get('/register', function(req, res) {
-    res.render('register', { });
+    res.render('register', {expressFlash : req.flash('error') });
 });
 
 router.post('/register', uploading.single('image'), function(req, res) {
