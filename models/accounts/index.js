@@ -6,6 +6,7 @@ var fields= ["email","bio"];
 var subcreate=function (newUser, req,cb) {
 	User.register(newUser, req.body.password, function(err, newUser) {
         if (err) {
+        	req.flash('error',err);
 	    console.log(err);
             cb(err);
         }

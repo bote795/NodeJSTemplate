@@ -12,6 +12,7 @@ module.exports = {
          };
         newImage.save(function(err, image) {
             if(err) {
+                req.flash('error', "Error Creating Image");  
                 cb(err);
             }
             cb(null, image);

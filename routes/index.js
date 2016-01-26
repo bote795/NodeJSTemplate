@@ -29,7 +29,15 @@ var nodemailerMailgun = nodemailer.createTransport(configsMail);
 var uploading = multer({
   dest: __dirname + '/../public/uploads/',
   limits: {fileSize: 1000000, files:1},
+  fileFilter: function (req, file, cb) {
+    if (file.mimetype.indexOf("image") == -1) {
+        req.flash('error',"Didn't upload file. File type is not an image!")
+        return cb(null,false);
+    }
+    cb(null,true);
+  },
 });
+var uplTemp = uploading.single('image');
 /*
 uploading.single('image') = used when form has a file
 image is the name of the field of the file
@@ -54,7 +62,8 @@ router.post('/register', uploading.single('image'), function(req, res) {
 
     User.create(req, function(err, account) {
         if (err) {
-            return res.render('register', { account : account , err : err });
+            return res.render('register', { account : account ,
+             expressFlash : req.flash('error') });
         }
 
         passport.authenticate('local')(req, res, function () {
@@ -74,9 +83,9 @@ router.route('/edit')
             //refresh user data for session (passport)
             req.login(user, function(err) {
                 if (err) return next(err)
-                req.flash('success', "Successfuly Changed Data");  
+                req.flash('error', "Successfuly Changed Data"); 
                 res.render('edit', { user : req.user , 
-                  expressFlash: req.flash('success')});
+                  expressFlash: req.flash("error")});
             })
         })
     });
