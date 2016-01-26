@@ -6,3 +6,9 @@ body {
 a {
   color: #00B7FF;
 }
+
+img.selected{
+	border:2px solid #fff;
+	box-shadow: 10px 10px 5px #ccc;
+	-webkit-box-shadow: 10px 10px 5px #ccc;
+}

@@ -14,9 +14,17 @@
 			{{user.bio}}
 			</textarea>
 		</div>
+		<div id="pAvatars">
+			<p>Previous Avatars</p>
+			{{#user.avatars}}
+				<img class="avatars" src="/images/{{this}}" height="160" width="160">	
+			{{/user.avatars}}
+		</div>
+		<p>current Image</p>
 		{{#if user.image}}
-		  <img src="/images/{{user.image}}" height="160" width="160">	
+		  <img src="/images/{{user.image}}" height="160" width="160">
 		{{/if}}
+		
 		<div class="form-group">
 			<label for="file">update avatar Image</label>
 			<input type="file" name="image" class="form-control">
@@ -25,6 +33,11 @@
 		<a href="/">
 			<button type="button" class="btn btn-primary">Cancel</button>
 		</a>	
-	</form>											
-
+	</form>	
+	<style>
+		img{
+			margin: 8px;
+		}
+	</style>
+	<script src="js/chooseAvatar.js"></script>
 </div>
