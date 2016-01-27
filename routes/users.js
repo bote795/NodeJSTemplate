@@ -52,19 +52,19 @@ router.get('/', function (req, res) {
         {
             res.json(err);
         }
-        res.render('index', { title: "Game Records",user : req.user, groups: data });
+        res.render('user/index', { title: "Game Records",user : req.user, groups: data });
     });
 });
 router.route('/register')
   .get( function(req, res) {
-    res.render('register', {expressFlash : req.flash('error') });
+    res.render('user/register', {expressFlash : req.flash('error') });
   })
 
   .post(uploading.single('image'), function(req, res) {
 
       User.create(req, function(err, account) {
           if (err) {
-              return res.render('register', { account : account ,
+              return res.render('user/register', { account : account ,
                expressFlash : req.flash('error') });
           }
 
@@ -73,9 +73,10 @@ router.route('/register')
           });
       });
   });
+//routes to edit user basic info
 router.route('/edit')
     .get(middleware.isAuthenticated,function(req, res) {
-        res.render('edit', { user : req.user });
+        res.render('user/edit', { user : req.user });
     })
     //route to change user information
     .post(middleware.isAuthenticated,uploading.single('image'), function(req, res) {
@@ -86,14 +87,15 @@ router.route('/edit')
             req.login(user, function(err) {
                 if (err) return next(err)
                 req.flash('error', "Successfuly Changed Data"); 
-                res.render('edit', { user : req.user , 
+                res.render('user/edit', { user : req.user , 
                   expressFlash: req.flash("error")});
             })
         })
     });
+//routes to edit password    
 router.route('/editPass') 
     .get(middleware.isAuthenticated,function (req,  res) {
-        res.render('editPass', {});
+        res.render('user/editPass', {});
     }) 
     /*
     Todo need to check on client side 
@@ -112,10 +114,10 @@ router.route('/editPass')
                 if (err) 
                 {
                     req.flash('error',"An error occurred");
-                    res.render('editPass',{expressFlash: req.flash('error') })
+                    res.render('user/editPass',{expressFlash: req.flash('error') })
                 }
                   req.flash('success',"Password Change successful!");
-                  res.render('editPass',{expressFlash: req.flash('success')})
+                  res.render('user/editPass',{expressFlash: req.flash('success')})
             })
             
         }
@@ -123,7 +125,7 @@ router.route('/editPass')
         {
 
             req.flash('error',"An error occurred");
-            res.render('editPass',{expressFlash: req.flash('error') })
+            res.render('user/editPass',{expressFlash: req.flash('error') })
         }
     });
 router.route('/login')
@@ -133,7 +135,7 @@ router.route('/login')
 
   .post(passport.authenticate('local',{ failureRedirect: '/login',failureFlash: true  }), function(req, res) {
     res.redirect('/');
-});
+  });
 
 router.get('/logout', function(req, res) {
     req.logout();
