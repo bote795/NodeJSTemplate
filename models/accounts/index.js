@@ -1,7 +1,9 @@
 var User = require('./account');
 var Image = require('../images/index');
 var debug = require('debug')('accounts');
-var fields= ["email","bio"]; 
+var fields= ["email","bio","Oldimage"]; 
+var mongoose = require('mongoose');
+
 //registers the user so we don't have to re-write this code in create
 var subcreate=function (newUser, req,cb) {
 	User.register(newUser, req.body.password, function(err, newUser) {
@@ -96,7 +98,14 @@ module.exports = {
 		for (var i = 0; i < fields.length; i++) {
 			if(req.body[fields[i]].trim())
 			{
-				newFields[fields[i]]=req.body[fields[i]].trim();
+				//if an oldImage avatar is choosen then lets save that as new
+				//display pic instead convertId to objectId
+				if ("Oldimage" == fields[i] ) {
+					newFields["image"]=	
+					mongoose.Types.ObjectId(req.body[fields[i]]);
+				}
+				else
+					newFields[fields[i]]=req.body[fields[i]].trim();
 			}
 		};
 		//if a file is being passed

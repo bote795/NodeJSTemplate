@@ -10,5 +10,11 @@ function select (e) {
 	};
 	
 	if (e.target != parent)
+	{
 		e.target.classList.add("selected");
+		var input =document.getElementById("Pimage");
+		input.value=e.target.id;
+
+	}
+		
 }
