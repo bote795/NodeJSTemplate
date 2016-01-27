@@ -127,7 +127,7 @@ router.route('/editPass')
 router.route('/login')
   .get(function(req, res) {
     res.render('login', { user : req.user,  expressFlash:req.flash('error')});
-  });
+  })
 
   .post(passport.authenticate('local',{ failureRedirect: '/login',failureFlash: true  }), function(req, res) {
     res.redirect('/');
