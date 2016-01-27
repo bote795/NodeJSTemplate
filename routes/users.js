@@ -53,24 +53,24 @@ router.get('/', function (req, res) {
         res.render('index', { title: "Game Records",user : req.user, groups: data });
     });
 });
-
-router.get('/register', function(req, res) {
+router.route('/register')
+  .get( function(req, res) {
     res.render('register', {expressFlash : req.flash('error') });
-});
+  })
 
-router.post('/register', uploading.single('image'), function(req, res) {
+  .post(uploading.single('image'), function(req, res) {
 
-    User.create(req, function(err, account) {
-        if (err) {
-            return res.render('register', { account : account ,
-             expressFlash : req.flash('error') });
-        }
+      User.create(req, function(err, account) {
+          if (err) {
+              return res.render('register', { account : account ,
+               expressFlash : req.flash('error') });
+          }
 
-        passport.authenticate('local')(req, res, function () {
-            res.redirect('/');
-        });
-    });
-});
+          passport.authenticate('local')(req, res, function () {
+              res.redirect('/');
+          });
+      });
+  });
 router.route('/edit')
     .get(function(req, res) {
         res.render('edit', { user : req.user });
@@ -124,12 +124,12 @@ router.route('/editPass')
             res.render('editPass',{expressFlash: req.flash('error') })
         }
     });
-
-router.get('/login', function(req, res) {
+router.route('/login')
+  .get(function(req, res) {
     res.render('login', { user : req.user,  expressFlash:req.flash('error')});
-});
+  });
 
-router.post('/login', passport.authenticate('local',{ failureRedirect: '/login',failureFlash: true  }), function(req, res) {
+  .post(passport.authenticate('local',{ failureRedirect: '/login',failureFlash: true  }), function(req, res) {
     res.redirect('/');
 });
 
