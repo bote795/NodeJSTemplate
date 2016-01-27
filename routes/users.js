@@ -52,9 +52,21 @@ router.get('/', function (req, res) {
         {
             res.json(err);
         }
-        res.render('user/index', { title: "Game Records",user : req.user, groups: data });
+        res.render('user/index', { title: "Game Records",
+          user : req.user, groups: data, expressFlash: req.flash('error') });
     });
 });
+router.route('/public/:id')
+  .get(function(req, res) {
+    User.get(req.params.id,function (err, user) {
+      if (err) {
+        req.flash('error', "User doesn't exist")
+        res.redirect('/');  
+      };
+      res.render('user/public', {publicUser: user , user: req.user})
+    })
+  })
+
 router.route('/register')
   .get( function(req, res) {
     res.render('user/register', {expressFlash : req.flash('error') });

@@ -5,6 +5,9 @@
   <a href="/register">Register</a>
 {{/unless}}
 {{#if user}}
+  {{#if expressFlash}}
+      <p><strong>{{ expressFlash }}</strong></p>
+  {{/if}}
   <img src="/images/{{user.image}}" height="160" width="160">
   <h4 style="display: inline-block;">
     <span>you are currently logged in as {{user.username}} </span>
