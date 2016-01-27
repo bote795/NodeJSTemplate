@@ -3,8 +3,10 @@ var router = express.Router();
 var Group = require('../models/groups/index');
 var hbs = require('hbs')
   , fs = require('fs')
+  , middleware = require('../middleware/authentication')
   , form = fs.readFileSync(__dirname + '/../views/group/_form.hbs', 'utf8');
 hbs.registerPartial('formPartial', form); 
+router.use(middleware.isAuthenticated);
 
 router.route('/groups')
     .get(function(req, res) {

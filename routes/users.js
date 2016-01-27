@@ -10,7 +10,8 @@ var async = require("async"),
     nodemailer = require("nodemailer"),
     mg = require('nodemailer-mailgun-transport'),
     hbs = require('nodemailer-express-handlebars'),
-    env = require('node-env-file');
+    env = require('node-env-file'),
+    middleware = require('../middleware/authentication');
  // Load any undefined ENV variables from a specified file.
 env(__dirname+"/.." + '/.env');
 var email = process.env.EMAIL;
@@ -25,11 +26,12 @@ var configsMail = {
 
 var nodemailerMailgun = nodemailer.createTransport(configsMail);
 
-
+//parameters to upload files
 var uploading = multer({
   dest: __dirname + '/../public/uploads/',
   limits: {fileSize: 1000000, files:1},
   fileFilter: function (req, file, cb) {
+    //only allow image files
     if (file.mimetype.indexOf("image") == -1) {
         req.flash('error',"Didn't upload file. File type is not an image!")
         return cb(null,false);
@@ -37,12 +39,12 @@ var uploading = multer({
     cb(null,true);
   },
 });
-var uplTemp = uploading.single('image');
+
 /*
-uploading.single('image') = used when form has a file
-image is the name of the field of the file
-TODO: need to confirm that file is an image
+  uploading.single('image') = used when form has a file
+  image is the name of the field of the file
 */
+
 
 router.get('/', function (req, res) {
     Group.all( function(err, data) {
@@ -72,11 +74,11 @@ router.route('/register')
       });
   });
 router.route('/edit')
-    .get(function(req, res) {
+    .get(middleware.isAuthenticated,function(req, res) {
         res.render('edit', { user : req.user });
     })
     //route to change user information
-    .post(uploading.single('image'), function(req, res) {
+    .post(middleware.isAuthenticated,uploading.single('image'), function(req, res) {
         console.log(req.body);
         User.put(req,function (err,user) {
 
@@ -90,7 +92,7 @@ router.route('/edit')
         })
     });
 router.route('/editPass') 
-    .get(function (req,  res) {
+    .get(middleware.isAuthenticated,function (req,  res) {
         res.render('editPass', {});
     }) 
     /*
@@ -98,7 +100,7 @@ router.route('/editPass')
         size and passwords match
     Do length check must be bigger than X
     */
-    .post(function(req, res) {
+    .post(middleware.isAuthenticated,function(req, res) {
         var pas1 = req.body.password.trim();
         var pas2 = req.body.password2.trim();
         var flash={};

@@ -3,9 +3,10 @@ var router = express.Router();
 var Game = require('../models/games/index');
 var hbs = require('hbs')
   , fs = require('fs')
+  , middleware = require('../middleware/authentication')
   , form = fs.readFileSync(__dirname + '/../views/game/_form.hbs', 'utf8');
 hbs.registerPartial('formPartial', form); 
-
+router.use(middleware.isAuthenticated);
 router.route('/games')
     .get(function(req, res) {
        Game.all(function (err, games) {
