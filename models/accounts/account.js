@@ -12,8 +12,10 @@ var Account = new Schema({
     avatars : [{ 
      	type: mongoose.Schema.Types.ObjectId, 
      	ref: 'Image'}],
-	following: [{userId: String}],
-	followers: [{userId: String}],
+	following: [{type: mongoose.Schema.Types.ObjectId,
+        ref: 'Account'}],
+	followers: [{type: mongoose.Schema.Types.ObjectId,
+        ref: 'Account'}],
 	resetPasswordToken: String,
   	resetPasswordExpires: Date
 });

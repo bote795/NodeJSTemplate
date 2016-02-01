@@ -1,7 +1,7 @@
 var User = require('./account');
 var Image = require('../images/index');
 var debug = require('debug')('accounts');
-var fields= ["email","bio","Oldimage"]; 
+var fields= ["email","bio","Oldimage","following", "followers"]; 
 var mongoose = require('mongoose');
 
 //registers the user so we don't have to re-write this code in create
@@ -96,6 +96,7 @@ module.exports = {
 		//so that we can update those if they are not in the object
 		//or just update
 		for (var i = 0; i < fields.length; i++) {
+			if(fields[i] in req.body)
 			if(req.body[fields[i]].trim())
 			{
 				//if an oldImage avatar is choosen then lets save that as new
@@ -103,6 +104,12 @@ module.exports = {
 				if ("Oldimage" == fields[i] ) {
 					newFields["image"]=	
 					mongoose.Types.ObjectId(req.body[fields[i]]);
+				}
+				else if ("followers" == fields[i]  || 
+					"following" == fields[i]) {
+					newFields["$push"]={
+						[fields[i]] : mongoose.Types.ObjectId(req.body[fields[i]])
+					}
 				}
 				else
 					newFields[fields[i]]=req.body[fields[i]].trim();

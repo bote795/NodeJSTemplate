@@ -11,7 +11,11 @@ var async = require("async"),
     mg = require('nodemailer-mailgun-transport'),
     hbs = require('nodemailer-express-handlebars'),
     env = require('node-env-file'),
-    middleware = require('../middleware/authentication');
+    fs = require('fs'),
+    handlebars = require('hbs'),
+    middleware = require('../middleware/authentication'),
+    connTemplate = fs.readFileSync(__dirname + '/../views/user/_connectionsInfo.hbs', 'utf8');
+    handlebars.registerPartial('connections', connTemplate); 
  // Load any undefined ENV variables from a specified file.
 env(__dirname+"/.." + '/.env');
 var email = process.env.EMAIL;
@@ -47,25 +51,106 @@ var uploading = multer({
 
 
 router.get('/', function (req, res) {
+    var stats={};
+    stats.countFollowers = 0;
+    stats.countFollowing = 0;
     Group.all( function(err, data) {
         if (err) 
         {
             res.json(err);
         }
+        if (req.isAuthenticated()) {
+        //count number of follers
+        if ('followers' in req.user)
+          stats.countFollowing = req.user.following.length;
+        //count number of people following
+        if ('following' in req.user) 
+          stats.countFollowers = req.user.followers.length;
+        };
         res.render('user/index', { title: "Game Records",
-          user : req.user, groups: data, expressFlash: req.flash('error') });
+          user : req.user, 
+          groups: data, 
+          expressFlash: req.flash('error'),
+          stats: stats });
     });
 });
+
+/*
+  Route to be able to see other peoples profiles
+*/
 router.route('/public/:id')
   .get(function(req, res) {
+    var isFollowing = false;
+    var stats={};
+    stats.countFollowers = 0;
+    stats.countFollowing = 0;
+    //check to see if user is already following specific user
+    if (req.isAuthenticated()) {
+      if ('following' in req.user) {
+        if (req.user.following.indexOf(req.params.id) > -1) 
+        {
+          isFollowing=true;
+        };
+
+      }
+    };    
+
+
     User.get(req.params.id,function (err, user) {
       if (err) {
         req.flash('error', "User doesn't exist")
         res.redirect('/');  
       };
-      res.render('user/public', {publicUser: user , user: req.user})
+
+      //count number of follers
+      if ('followers' in user)
+        stats.countFollowing = user.following.length;
+      //count number of people following
+      if ('following' in user) 
+        stats.countFollowers = user.followers.length;
+      res.render('user/public', {publicUser: user , 
+        user: req.user, 
+        isFollowing: isFollowing,
+        expressFlash: req.flash('error'),
+        stats: stats})
     })
   })
+
+/*
+  update following
+*/
+router.route('/follow/:id')
+  .get(function(req,res) {
+    if (!req.isAuthenticated())
+    {
+      req.flash("error","Need to login to be able to follow someone");
+      return res.redirect("/login");
+    }
+    req.body["following"]=req.params.id;
+
+    //that user now follows the target
+    User.put(req,function (err,user) {
+      if(err)
+      {
+        req.flash("error","couldn't update following properly");
+        return res.redirect("/public/"+req.params.id);
+      }
+      //the target now is being followed by current user
+      var temp = {};
+      temp.body={};
+      temp.body["followers"]=req.user.id;
+      temp.user={};
+      temp.user._id= req.params.id;
+      User.put(temp,function (err,user) {
+        if (err) {
+          req.flash("error","couldn't update followers properly");
+          return res.redirect("/public/"+req.params.id);   
+        };
+        return res.redirect("/public/"+req.params.id);
+      })
+    })
+  })
+
 
 router.route('/register')
   .get( function(req, res) {
