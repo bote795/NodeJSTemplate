@@ -80,7 +80,7 @@ router.get('/', function (req, res) {
 /*
   Route to be able to see other peoples profiles
 */
-router.route('/public/:id')
+router.route('/:id/public')
   .get(function(req, res) {
     var isFollowing = false;
     var stats={};
@@ -115,7 +115,7 @@ router.route('/public/:id')
         isFollowing: isFollowing,
         expressFlash: req.flash('error'),
         stats: stats})
-    })
+    },true)
   })
 
 /*

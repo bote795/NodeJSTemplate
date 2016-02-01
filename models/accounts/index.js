@@ -72,8 +72,16 @@ module.exports = {
 
 	}, //close create
 	//retrieves one user by id
-	get: function (id, cb) {
-		User.findById(id, function(err, user) {
+	get: function (id, cb,name) {
+		var findBy={};
+		if (name) {
+			findBy = {username: id};
+		}
+		else
+		{
+			findBy = {_id: id};
+		}
+		User.findOne(findBy, function(err, user) {
             if(err) {
                 return cb(err);
             }
