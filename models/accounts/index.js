@@ -246,5 +246,26 @@ module.exports = {
             }
           cb(null, user);
         });
+	},
+	/*
+		@params id id of user
+		@params type <followers/following>
+		@params removeId id of target being removed
+		@cb callback function
+	*/
+	removeFromArray: function(id,type,removeId,cb) {
+		User.findById(id ,function(err, user){
+		 	if (err) {
+		 		return cb(err);
+		 	};
+		    if (user){
+		    	var index =user[type].indexOf(removeId);
+		        if (index>-1) {
+		        	user[type].splice(index,1);
+		        	user.save()
+		        	cb(null,user)
+		        };
+		    } 
+		});		
 	}
 } 

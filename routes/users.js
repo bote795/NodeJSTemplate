@@ -85,24 +85,24 @@ router.route('/:id/public')
     var isFollowing = false;
     var stats={};
     stats.countFollowers = 0;
-    stats.countFollowing = 0;
-
-    //check to see if user is already following specific user
-    if (req.isAuthenticated()) {
-      if ('following' in req.user) {
-        if (req.user.following.indexOf(req.params.id) > -1) 
-        {
-          isFollowing=true;
-        };
-
-      }
-    };    
+    stats.countFollowing = 0;   
 
     User.get(req.params.id,function (err, user) {
       if (err) {
         req.flash('error', "User doesn't exist")
         return res.redirect('/');  
       };
+
+      //check to see if user is already following specific user
+      if (req.isAuthenticated()) {
+        if ('following' in req.user) {
+          if (req.user.following.indexOf(user._id) > -1) 
+          {
+            isFollowing=true;
+          };
+
+        }
+      }; 
 
       //count number of follers
       if ('followers' in user)
@@ -135,7 +135,7 @@ router.route('/follow/:id')
       if(err)
       {
         req.flash("error","couldn't update following properly");
-        return res.redirect("/public/"+req.params.id);
+        return res.redirect("back");
       }
       //the target now is being followed by current user
       var temp = {};
@@ -144,10 +144,36 @@ router.route('/follow/:id')
       User.put(temp,function (err,user) {
         if (err) {
           req.flash("error","couldn't update followers properly");
-          return res.redirect("/public/"+req.params.id);   
+          return res.redirect("back");   
         };
-        return res.redirect("/public/"+req.params.id);
+        return res.redirect("/"+user.username+"/public/");
       },false, null, true, req.params.id)
+    })
+  })
+/*
+  update unfollow
+*/
+router.route('/unfollow/:id')
+  .get(function(req,res) {
+    if (!req.isAuthenticated())
+    {
+      req.flash("error","Need to login to be able to unfollow someone");
+      return res.redirect("/login");
+    }
+    User.removeFromArray(req.user._id,"following",req.params.id,function(err) {
+        if(err)
+        {
+          req.flash("error","couldn't unfollow");
+          return res.redirect("back");
+        }
+      User.removeFromArray(req.params.id, "followers", req.user._id,function (err,user) {
+        if (err) {
+          req.flash("error","couldn't remove follower");
+          return res.redirect("back");          
+        };
+        return res.redirect("/"+user.username+"/public");  
+      })
+      
     })
   })
 

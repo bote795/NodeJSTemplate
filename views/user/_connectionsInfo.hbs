@@ -1,12 +1,12 @@
 <div>
   {{#if stats.countFollowers}}
   <h6>Followers</h6>
-  <p><a href="/{{publicUser.username}}/followers">{{stats.countFollowers}}</a></p>
+  <p><a href="/{{user.username}}/followers">{{stats.countFollowers}}</a></p>
   {{/if}}
 </div>
 <div>
   {{#if stats.countFollowing}}
   <h6>Following</h6>
-  <p><a href="/{{publicUser.username}}/following">{{stats.countFollowing}}</a></p>
+  <p><a href="/{{user.username}}/following">{{stats.countFollowing}}</a></p>
   {{/if}}
 </div>

@@ -10,9 +10,9 @@ var LocalStrategy = require ('passport-local').Strategy;
 var methodOverride = require('method-override');
 var hbs = require('hbs');
 var routes = require('./routes/users');
+var images = require('./routes/images');
 var games = require('./routes/games');
 var groups = require('./routes/groups');
-var images = require('./routes/images');
 var flash = require('express-flash');
 
 var app = express();
@@ -49,9 +49,9 @@ app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
+app.use('/', images);
 app.use('/', groups);
 app.use('/', games);
-app.use('/', images);
 //passport config
 var Account = require('./models/accounts/account');
 passport.use(new LocalStrategy(Account.authenticate()));
