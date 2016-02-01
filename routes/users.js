@@ -98,7 +98,6 @@ router.route('/public/:id')
       }
     };    
 
-
     User.get(req.params.id,function (err, user) {
       if (err) {
         req.flash('error', "User doesn't exist")
@@ -142,15 +141,13 @@ router.route('/follow/:id')
       var temp = {};
       temp.body={};
       temp.body["followers"]=req.user.id;
-      temp.user={};
-      temp.user._id= req.params.id;
       User.put(temp,function (err,user) {
         if (err) {
           req.flash("error","couldn't update followers properly");
           return res.redirect("/public/"+req.params.id);   
         };
         return res.redirect("/public/"+req.params.id);
-      })
+      },false, null, true, req.params.id)
     })
   })
 

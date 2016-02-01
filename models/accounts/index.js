@@ -89,8 +89,20 @@ module.exports = {
           cb(null, users);
         });
 	},
-	put: function (req, cb) {
+	/*
+		@params request
+		@params cb
+		OPTIONAL PARAMS
+		@params name <true:false> (Custom username lookup)
+		@params username (if name true, put username here)
+		@params isCustomid <true:false> (different from current user)
+		@params isCustomid if customid true (id of different user)
+
+	*/
+	put: function (req, cb, name, username, isCustomid, id) {
 		var newFields={};
+		var name = typeof name !== 'undefined' ? name : false;
+		var isCustomid = typeof isCustomid !== 'undefined' ? isCustomid : false;
 		var options = {new: true};
 		//add fields that are in req.body aka from form
 		//so that we can update those if they are not in the object
@@ -115,6 +127,17 @@ module.exports = {
 					newFields[fields[i]]=req.body[fields[i]].trim();
 			}
 		};
+		var findBy={};
+		if (name) {
+			findBy = {username: username};
+		}
+		else if (isCustomid) {
+			findBy = {_id: id};	
+		}
+		else
+		{
+			findBy = {_id: req.user._id};
+		}
 		//if a file is being passed
 		//create file then save it along with other fields
         if ('file' in req) 
@@ -123,7 +146,7 @@ module.exports = {
         	Image.create(req,function (err,newImage) {
         		newFields["image"]=newImage._id;
         		newFields["$push"]={avatars: newImage._id};
-		      	User.findOneAndUpdate({_id: req.user._id}, newFields,options, function(err, user) {
+		      	User.findOneAndUpdate(findBy, newFields,options, function(err, user) {
 	                if(err) {
 	                    return cb(err);
 	                }
@@ -134,7 +157,7 @@ module.exports = {
         //no file was sent just update other fields
         else
         {
-	      	User.findOneAndUpdate({_id: req.user._id}, newFields,options, function(err, user) {
+	      	User.findOneAndUpdate(findBy, newFields,options, function(err, user) {
 	            if(err) {
 	                return cb(err);
 	            }
