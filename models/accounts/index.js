@@ -206,5 +206,14 @@ module.exports = {
 	              });
             });
         });
+	},
+	//retrieves one user by id
+	getUsers: function (id,type, cb) {
+		User.findOne({username: id}).populate(type).exec(function(err, user) {
+            if(err) {
+                return cb(err);
+            }
+          cb(null, user);
+        });
 	}
 } 

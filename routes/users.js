@@ -14,8 +14,10 @@ var async = require("async"),
     fs = require('fs'),
     handlebars = require('hbs'),
     middleware = require('../middleware/authentication'),
-    connTemplate = fs.readFileSync(__dirname + '/../views/user/_connectionsInfo.hbs', 'utf8');
+    connTemplate = fs.readFileSync(__dirname + '/../views/user/_connectionsInfo.hbs', 'utf8'),
+    miniTemplate = fs.readFileSync(__dirname + '/../views/user/_userMiniTemplate.hbs', 'utf8');
     handlebars.registerPartial('connections', connTemplate); 
+    handlebars.registerPartial('userMini', miniTemplate); 
  // Load any undefined ENV variables from a specified file.
 env(__dirname+"/.." + '/.env');
 var email = process.env.EMAIL;
@@ -60,12 +62,12 @@ router.get('/', function (req, res) {
             res.json(err);
         }
         if (req.isAuthenticated()) {
-        //count number of follers
-        if ('followers' in req.user)
-          stats.countFollowing = req.user.following.length;
-        //count number of people following
-        if ('following' in req.user) 
-          stats.countFollowers = req.user.followers.length;
+          //count number of follers
+          if ('followers' in req.user)
+            stats.countFollowing = req.user.following.length;
+          //count number of people following
+          if ('following' in req.user) 
+            stats.countFollowers = req.user.followers.length;
         };
         res.render('user/index', { title: "Game Records",
           user : req.user, 
@@ -84,6 +86,7 @@ router.route('/public/:id')
     var stats={};
     stats.countFollowers = 0;
     stats.countFollowing = 0;
+
     //check to see if user is already following specific user
     if (req.isAuthenticated()) {
       if ('following' in req.user) {
@@ -99,7 +102,7 @@ router.route('/public/:id')
     User.get(req.params.id,function (err, user) {
       if (err) {
         req.flash('error', "User doesn't exist")
-        res.redirect('/');  
+        return res.redirect('/');  
       };
 
       //count number of follers
@@ -151,7 +154,32 @@ router.route('/follow/:id')
     })
   })
 
+/*
+  show all users followers
+*/
+router.route('/:id/followers')
+  .get(function(req,res) {
+    User.getUsers(req.params.id,"followers",function(err,user) {
 
+        res.render('user/followers', { title: "Game Records",
+          user : req.user, 
+          expressFlash: req.flash('error'),
+          user: user });
+    });
+  })
+/*
+  show all users the user is following
+*/
+router.route('/:id/following')
+  .get(function(req,res) {
+     User.getUsers(req.params.id,"following",function(err,user) {
+        res.render('user/following', { title: "Game Records",
+          user : req.user, 
+          expressFlash: req.flash('error'),
+          user: user });
+    });
+  })
+//make an account
 router.route('/register')
   .get( function(req, res) {
     res.render('user/register', {expressFlash : req.flash('error') });
