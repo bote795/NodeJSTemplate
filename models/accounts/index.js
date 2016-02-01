@@ -85,6 +85,10 @@ module.exports = {
             if(err) {
                 return cb(err);
             }
+            if (!user) {
+
+            	return cb(Error("User not found"));
+            };
           cb(null, user);
         });
 	},
