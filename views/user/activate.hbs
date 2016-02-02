@@ -1,0 +1,17 @@
+<div class="container">
+	<h1>Resend Activation link</h1>
+	{{#if expressFlash}}
+	    <p><strong>{{ expressFlash }}</strong></p>
+	{{/if}}
+	<form action="/activate" role="form" method="post" style="max-width: 300px;">
+	    <div class="form-group">
+	   		<p>Enter your email address below and we will send you activation link.</p>
+			<label for="email">Email:</label>
+			<input type="email" class="form-control" name="email" placeholder="Enter Email">
+	    </div>
+		<button class="btn btn-default" type="submit">Submit</button>
+		<a href="/">
+			<button type="button" class="btn btn-primary">Cancel</button>
+		</a>	
+	</form>	
+</div>

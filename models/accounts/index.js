@@ -8,6 +8,7 @@ var mongoose = require('mongoose');
 var subcreate=function (newUser, req,cb) {
 	User.register(newUser, req.body.password, function(err, newUser) {
         if (err) {
+        	//find  a way to detect query errors from register errs
         	req.flash('error',err.message);
 	    	debug(err);
             return cb(err);
@@ -16,8 +17,15 @@ var subcreate=function (newUser, req,cb) {
         cb(null, newUser);
 	});
 };
-var findByTokenExpire=function (token, cb) {
-	  User.findOne({ resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } }, function(err, user) {
+var findByTokenExpire=function (token, cb,activate) {
+	  var query = {};
+	  var activate = typeof activate !== 'undefined' ? activate : false;
+	  if (activate) {
+	  	query = { activateAccountToken: token, activateAccountExpires: { $gt: Date.now() } };
+	  }
+	  else
+	  	query= { resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } };
+	  User.findOne(query, function(err, user) {
         if (!user) {
           return cb(err);
         }
@@ -30,7 +38,11 @@ module.exports = {
 		call to create a new User
 	*/
 	create: function (req, cb) {
-		var newUser = new User({ username : req.body.username, email: req.body.email });
+		var newUser = new User({ username : req.body.username,
+		 	email: req.body.email,
+		 	activateAccountToken: req.body.token,
+		 	activateAccountExpires:  Date.now() + 3600000 // 1 hour
+		  });
 		//if passing image when registering
 		if ('file' in req) 
 		{
@@ -207,16 +219,19 @@ module.exports = {
 	/*
 		Function to find by email and set new Token
 	*/
-	findByEmailToken: function(email, token, cb) {
+	findByEmailToken: function(email, token, cb,activate) {
+	  var activate = typeof activate !== 'undefined' ? activate : false;
       User.findOne({ email: email }, function(err, user) {
         if (!user) {
           req.flash('error', 'No account with that email address exists.');
-          return res.redirect('/forgot', { expressFlash : req.flash('error')});
         }
-
-        user.resetPasswordToken = token;
-        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-
+        if (activate) {
+            user.activateAccountToken = token;
+            user.activateAccountExpires = Date.now() + 3600000; // 1 hour
+        }else{
+	        user.resetPasswordToken = token;
+	        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+	    }
         user.save(function(err) {
           cb(err, token, user);
         });
@@ -271,5 +286,7 @@ module.exports = {
 		        };
 		    } 
 		});		
-	}
+	},
+
+
 } 

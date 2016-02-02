@@ -2,8 +2,8 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var passportLocalMongoose = require('passport-local-mongoose');
 var Account = new Schema({
-	username: { type: String, required: true, unique: true },
-	email: { type: String, required: true, unique: true },
+	username: { type: String, required: true, index: { unique: true }},
+	email: { type: String, required: true, index: { unique: true }},
 	password: String,
     image: { 
      	type: mongoose.Schema.Types.ObjectId, 
@@ -17,7 +17,10 @@ var Account = new Schema({
 	followers: [{type: mongoose.Schema.Types.ObjectId,
         ref: 'Account'}],
 	resetPasswordToken: String,
-  	resetPasswordExpires: Date
+  	resetPasswordExpires: Date,
+    activateAccountToken: String,
+    activateAccountExpires: Date,
+    accountActivated: {type: Boolean, required: true, default: false}
 });
 
 Account.plugin(passportLocalMongoose);

@@ -208,19 +208,169 @@ router.route('/register')
     res.render('user/register', {expressFlash : req.flash('error') });
   })
 
+/*
+  Creating a user and sending an activation Email with a token
+  that expires in one hour.
+*/
   .post(uploading.single('image'), function(req, res) {
-
-      User.create(req, function(err, account) {
-          if (err) {
-              return res.render('user/register', { account : account ,
-               expressFlash : req.flash('error') });
+          async.waterfall([
+          function(done) {
+            crypto.randomBytes(20, function(err, buf) {
+              var token = buf.toString('hex');
+              done(err, token);
+            });
+          },
+          function(token, done) {
+            req.body.token = token;
+            User.create(req, function(err, account) {
+              if (err) {
+                  return res.render('user/register', { account : account ,
+                   expressFlash : req.flash('error') });
+              }
+              done(err, token, account);
+            });
+          },
+          function(token, user, done) {
+            var options = {
+                 viewEngine: {
+                     extname: '.hbs',
+                     layoutsDir: 'views/email/',
+                     defaultLayout : 'accountConfirmation',
+                     partialsDir : 'views/email/partials/'
+                 },
+                 viewPath: 'views/email/',
+                 extName: '.hbs'
+              };
+            nodemailerMailgun.use('compile',hbs(options));
+            var mailOptions = {
+              to: user.email,
+              from: 'passwordreset@demo.com',    //change from
+              subject: 'GameRecords Activation email', //change the subject
+              template: 'accountConfirmation',
+              context: {
+                host: req.headers.host,
+                token: token
+              }
+            };
+            nodemailerMailgun.sendMail(mailOptions, function(err,info) {
+              if (err) 
+              {
+                 req.flash('error', "Error with sending confirmation Email")
+                  console.log("Error");
+                  console.log(err);
+              }
+              else
+              {
+                  req.flash('success', 'An e-mail has been sent to ' + user.email + ' with further instructions.');
+                  console.log('An e-mail has been sent to ' + user.email + ' with further instructions.');
+                  console.log('Response' + info);
+              }
+              done(err, 'done');
+            });
           }
-
+          ], 
+          function(err) {
+          if (err) return res.render('user/register', {expressFlash: req.flash("error")});;
+          res.render('user/register', {expressFlash: req.flash("success")});
+          });
+          /*
           passport.authenticate('local')(req, res, function () {
               res.redirect('/');
           });
-      });
+          */
+      
   });
+/*
+  Activates account for user
+*/
+router.route('/activate/:token')
+  .get(function(req,res) {
+          User.findByTokenExpire(req.params.token, function (err, user) {
+            if (err) {
+              req.flash('error',"Token was invalid or expired");
+              return res.redirect('back');
+            };
+            user.activateAccountToken = undefined;
+            user.activateAccountExpires = undefined;
+            user.accountActivated = true;
+            user.save();
+            req.logIn(user, function(err) {
+                if (err) {
+                  req.flash('error',"Logging in user");
+                  return res.redirect('back');
+                };
+                //done(null, user);
+                return res.redirect('/')
+            });
+          },true);
+  })
+/*
+  request a new activation token
+*/
+router.route('/activate')
+  .post(function(req,res) {
+      async.waterfall([
+      function(done) {
+        crypto.randomBytes(20, function(err, buf) {
+          var token = buf.toString('hex');
+          done(err, token);
+        });
+      },
+      function(token, done) {
+
+        User.findByEmailToken(req.body.email,token, function(err, account) {
+          if (err) {
+              req.flash('error', " No account with that email was found");
+              return res.render('back');
+          }
+          done(err, token, account);
+        },true);
+      },
+      function(token, user, done) {
+        //options for rendering hbs
+        var options = {
+             viewEngine: {
+                 extname: '.hbs',
+                 layoutsDir: 'views/email/',
+                 defaultLayout : 'accountConfirmation',
+                 partialsDir : 'views/email/partials/'
+             },
+             viewPath: 'views/email/',
+             extName: '.hbs'
+          };
+        nodemailerMailgun.use('compile',hbs(options));
+        var mailOptions = {
+          to: user.email,
+          from: 'passwordreset@demo.com',    //change from
+          subject: 'GameRecords Activation email', //change the subject
+          template: 'accountConfirmation',
+          context: {
+            host: req.headers.host,
+            token: token
+          }
+        };
+        nodemailerMailgun.sendMail(mailOptions, function(err,info) {
+          if (err) 
+          {
+             req.flash('error', "Error with sending confirmation Email")
+              console.log("Error");
+              console.log(err);
+          }
+          else
+          {
+              req.flash('success', 'An e-mail has been sent to ' + user.email + ' with further instructions.');
+              console.log('An e-mail has been sent to ' + user.email + ' with further instructions.');
+              console.log('Response' + info);
+          }
+          done(err, 'done');
+        });
+      }
+      ], 
+      function(err) {
+      if (err) return res.render('/activate', {expressFlash: req.flash("error")});;
+      res.render('/activate', {expressFlash: req.flash("success")});
+      });
+  })
 //routes to edit user basic info
 router.route('/edit')
     .get(middleware.isAuthenticated,function(req, res) {
@@ -329,8 +479,8 @@ router.route('/forgot')
           nodemailerMailgun.use('compile',hbs(options));
           var mailOptions = {
             to: user.email,
-            from: 'passwordreset@demo.com',
-            subject: 'Node.js Password Reset',
+            from: 'passwordreset@demo.com',    //change from
+            subject: 'Node.js Password Reset', //change the subject
             template: 'forgotePass',
             context: {
               host: req.headers.host,
