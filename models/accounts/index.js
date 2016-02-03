@@ -9,7 +9,13 @@ var subcreate=function (newUser, req,cb) {
 	User.register(newUser, req.body.password, function(err, newUser) {
         if (err) {
         	//find  a way to detect query errors from register errs
-        	req.flash('error',err.message);
+        	if (err.code == 11000) {
+        		req.flash('error',"A user with the given email is already registered");	
+        	}else
+        	{
+        		req.flash('error',err.message);
+        	}
+        	
 	    	debug(err);
             return cb(err);
         }
@@ -27,7 +33,7 @@ var findByTokenExpire=function (token, cb,activate) {
 	  	query= { resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } };
 	  User.findOne(query, function(err, user) {
         if (!user) {
-          return cb(err);
+          return cb(Error("User not found with matching token"));
         }
         cb(null,user);
       });

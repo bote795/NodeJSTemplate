@@ -308,6 +308,9 @@ router.route('/activate/:token')
   request a new activation token
 */
 router.route('/activate')
+  .get(function(req,res) {
+    res.render('user/activate')
+  })
   .post(function(req,res) {
       async.waterfall([
       function(done) {
@@ -318,7 +321,7 @@ router.route('/activate')
       },
       function(token, done) {
 
-        User.findByEmailToken(req.body.email,token, function(err, account) {
+        User.findByEmailToken(req.body.email,token, function(err, token, account) {
           if (err) {
               req.flash('error', " No account with that email was found");
               return res.render('back');
@@ -367,8 +370,8 @@ router.route('/activate')
       }
       ], 
       function(err) {
-      if (err) return res.render('/activate', {expressFlash: req.flash("error")});;
-      res.render('/activate', {expressFlash: req.flash("success")});
+      if (err) return res.render('user/activate', {expressFlash: req.flash("error")});;
+      res.render('user/activate', {expressFlash: req.flash("success")});
       });
   })
 //routes to edit user basic info
