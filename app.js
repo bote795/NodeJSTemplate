@@ -14,6 +14,7 @@ var images = require('./routes/images');
 var games = require('./routes/games');
 var groups = require('./routes/groups');
 var flash = require('express-flash');
+var configAuth = require('./config/auth');
 var app = express();
 // load the auth variables
 // view engine setup
@@ -38,7 +39,7 @@ app.use(methodOverride(function(req, res){
 
 app.use(cookieParser());
 app.use(require('express-session')({
-    secret: 'keyboard cat', // should be put in env variable
+    secret: configAuth.secret, // should be put in env variable
     resave: false,
     saveUninitialized: false
 }));
@@ -55,7 +56,7 @@ app.use('/', games);
 require('./config/passport')(passport);
 
 //mongoose
-mongoose.connect(process.env.DB ||'mongodb://localhost/gameRecords');
+mongoose.connect(configAuth.db);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

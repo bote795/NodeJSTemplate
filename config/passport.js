@@ -2,9 +2,20 @@ var LocalStrategy = require ('passport-local').Strategy;
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
 var configAuth = require('./auth');
-var User = require('./../models/accounts/account');
+var User = require('./../models/accounts/account'),
+    nodemailer = require("nodemailer"),
+    hbsMailer = require('nodemailer-express-handlebars'),
+    Account = require('./../models/accounts/account');
 
-var Account = require('./../models/accounts/account');
+var configsMail = {
+    service: configAuth.mailer.service,
+    auth: {
+    user:  configAuth.mailer.auth.user,
+    pass: configAuth.mailer.auth.pass
+  }
+}
+var nodemailerMailgun = nodemailer.createTransport(configsMail);
+
 function createUser(token,profile,done)
 {
 	console.log(profile);
@@ -33,7 +44,45 @@ function createUser(token,profile,done)
     newUser.save(function(err) {
         if (err)
             return done(err);
+        welcomeEmail(newUser);
         return done(null, newUser);
+    });
+}
+
+function welcomeEmail (user) {
+    var options = {
+         viewEngine: {
+             extname: '.hbs',
+             layoutsDir: 'views/email/',
+             defaultLayout : 'welcome',
+             partialsDir : 'views/email/partials/'
+         },
+         viewPath: 'views/email/',
+         extName: '.hbs'
+      };
+    nodemailerMailgun.use('compile',hbsMailer(options));
+    var mailOptions = {
+      to: user.email,
+      from: 'welcome@GameRecords.com',    //change from
+      subject: 'GameRecords welcome email', //change the subject
+      template: 'accountConfirmation',
+      context: {
+        title: "Game Records",
+      }
+    };
+    nodemailerMailgun.sendMail(mailOptions, function(err,info) {
+      if (err) 
+      {
+         req.flash('error', "Error with sending welcome Email")
+          console.log("Error");
+          console.log(err);
+      }
+      else
+      {
+          console.log('An e-mail has been sent to ' + user.email + ' with welcome email.');
+          console.log('Response' + info);
+      }
+      
     });
 }
 module.exports = function(passport) {

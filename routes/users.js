@@ -5,12 +5,12 @@ var User = require('../models/accounts/index');
 var router = express.Router();
 var Group = require('../models/groups/index');
 var multer = require('multer');
+var configAuth = require('../config/auth');
 var async = require("async"),
     crypto = require("crypto"),
     nodemailer = require("nodemailer"),
     mg = require('nodemailer-mailgun-transport'),
     hbs = require('nodemailer-express-handlebars'),
-    env = require('node-env-file'),
     fs = require('fs'),
     handlebars = require('hbs'),
     middleware = require('../middleware/authentication'),
@@ -18,18 +18,14 @@ var async = require("async"),
     miniTemplate = fs.readFileSync(__dirname + '/../views/user/_userMiniTemplate.hbs', 'utf8');
     handlebars.registerPartial('connections', connTemplate); 
     handlebars.registerPartial('userMini', miniTemplate); 
- // Load any undefined ENV variables from a specified file.
-env(__dirname+"/.." + '/.env');
-var email = process.env.EMAIL;
-var emailPass = process.env.PASS;
+
 var configsMail = {
-    service: "Hotmail",
+    service: configAuth.mailer.service,
     auth: {
-    user:  email,
-    pass: emailPass
+    user:  configAuth.mailer.auth.user,
+    pass: configAuth.mailer.auth.pass
   }
 }
-
 var nodemailerMailgun = nodemailer.createTransport(configsMail);
 
 //parameters to upload files
@@ -285,10 +281,10 @@ router.route('/register')
 */
 router.route('/auth/google')
   .get( passport.authenticate('google', 
-    { scope : ['profile', 'email'] }));
+    { successReturnToOrRedirect: true,scope : ['profile', 'email'] }));
 
 router.route('/auth/google/callback')
-  .get(passport.authenticate('google', { 
+  .get(passport.authenticate('google', { successReturnToOrRedirect: true,
     successRedirect : '/',
     failureRedirect: '/login' 
   }))
@@ -298,10 +294,10 @@ router.route('/auth/google/callback')
 */
 router.route('/auth/facebook')
   .get(passport.authenticate('facebook', 
-    { scope : 'email' }));
+    {successReturnToOrRedirect: true, scope : 'email' }));
     // handle the callback after facebook has authenticated the user
 router.route('/auth/facebook/callback')
-  .get(passport.authenticate('facebook', {
+  .get(passport.authenticate('facebook', {successReturnToOrRedirect: true,
         successRedirect : '/',
         failureRedirect : '/login'
     }));
@@ -459,7 +455,7 @@ router.route('/login')
     res.render('login', { user : req.user,  expressFlash:req.flash('error')});
   })
 
-  .post(passport.authenticate('local',{ failureRedirect: '/login',failureFlash: true  }), function(req, res) {
+  .post(passport.authenticate('local',{ successReturnToOrRedirect: true, failureRedirect: '/login',failureFlash: true  }), function(req, res) {
     res.redirect('/');
   });
 

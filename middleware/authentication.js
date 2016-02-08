@@ -12,8 +12,8 @@ module.exports ={
 	    	}
 	    }
 	        
-
+	    req.session.returnTo=req.path;
 	    // IF A USER ISN'T LOGGED IN, THEN REDIRECT THEM SOMEWHERE
-	    res.redirect('/');
+	    res.redirect('/login');
 	}
 }
