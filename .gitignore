@@ -2,3 +2,5 @@ node_modules
 /public/uploads
 .env
 /config/auth.js
+/bin/key.pem
+/bin/cert.pem
