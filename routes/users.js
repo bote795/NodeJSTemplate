@@ -279,28 +279,34 @@ router.route('/register')
 /*
   google login routes
 */
-router.route('/auth/google')
-  .get( passport.authenticate('google', 
-    { successReturnToOrRedirect: "/",scope : ['profile', 'email'] }));
+  if(configAuth.googleAuth.enabled)
+  {
+    router.route('/auth/google')
+      .get( passport.authenticate('google', 
+        { successReturnToOrRedirect: "/",scope : ['profile', 'email'] }));
 
-router.route('/auth/google/callback')
-  .get(passport.authenticate('google', { successReturnToOrRedirect: "/",
-    successRedirect : '/',
-    failureRedirect: '/login' 
-  }))
+    router.route('/auth/google/callback')
+      .get(passport.authenticate('google', { successReturnToOrRedirect: "/",
+        successRedirect : '/',
+        failureRedirect: '/login' 
+      }))
+  }
 
 /*
   facebook login routes
 */
-router.route('/auth/facebook')
-  .get(passport.authenticate('facebook', 
-    {successReturnToOrRedirect: "/", scope : 'email' }));
-    // handle the callback after facebook has authenticated the user
-router.route('/auth/facebook/callback')
-  .get(passport.authenticate('facebook', {successReturnToOrRedirect: "/",
-        successRedirect : '/',
-        failureRedirect : '/login'
-    }));
+  if(configAuth.facebookAuth.enabled)
+  {
+    router.route('/auth/facebook')
+      .get(passport.authenticate('facebook', 
+        {successReturnToOrRedirect: "/", scope : 'email' }));
+        // handle the callback after facebook has authenticated the user
+    router.route('/auth/facebook/callback')
+      .get(passport.authenticate('facebook', {successReturnToOrRedirect: "/",
+            successRedirect : '/',
+            failureRedirect : '/login'
+        }));
+  }
 /*
   Activates account for user
 */
