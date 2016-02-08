@@ -279,6 +279,10 @@ router.route('/register')
           */
       
   });
+
+/*
+  google login routes
+*/
 router.route('/auth/google')
   .get( passport.authenticate('google', 
     { scope : ['profile', 'email'] }));
@@ -289,7 +293,18 @@ router.route('/auth/google/callback')
     failureRedirect: '/login' 
   }))
 
-
+/*
+  facebook login routes
+*/
+router.route('/auth/facebook')
+  .get(passport.authenticate('facebook', 
+    { scope : 'email' }));
+    // handle the callback after facebook has authenticated the user
+router.route('/auth/facebook/callback')
+  .get(passport.authenticate('facebook', {
+        successRedirect : '/',
+        failureRedirect : '/login'
+    }));
 /*
   Activates account for user
 */

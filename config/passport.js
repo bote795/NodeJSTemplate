@@ -5,33 +5,34 @@ var configAuth = require('./auth');
 var User = require('./../models/accounts/account');
 
 var Account = require('./../models/accounts/account');
-function createUser(token,profile,type,done)
+function createUser(token,profile,done)
 {
 	console.log(profile);
 	var key = "google";
+    //TODO learn how to save images from other websites locally
 	//google
 		//photos object
-		//photos[0].value
-	var name;
-	if (type == "google") {
+		//photos[0].value url
+    //facebook
+        //photos object
+        //photos[0].value url
+	if (profile.provider == "google") {
 		key = "google";
-		name = profile.displayName;
 	}
-	else if (type == "facebook"){
+	else if (profile.provider == "facebook"){
 		key = "facebook";
-		name = profile.name.givenName + ' ' + profile.name.familyName; // look at the passport user profile to see how names are returned
 	}
     var newUser          = new User();
     newUser.accountActivated = true;
     // set all of the relevant information
     newUser[key].id    = profile.id;
     newUser[key].token = token;
-    newUser.username  = name;
+    newUser.username  = profile.displayName;
     newUser.email = profile.emails[0].value; // pull the first email
         // save the user
     newUser.save(function(err) {
         if (err)
-            throw err;
+            return done(err);
         return done(null, newUser);
     });
 }
@@ -63,7 +64,7 @@ module.exports = function(passport) {
                     return done(null, user);
                 } else {
                     // if the user isnt in our database, create a new user
-                    createUser(token,profile,"google",done);
+                    createUser(token,profile,done);
                 }
             });
         });
@@ -77,6 +78,7 @@ module.exports = function(passport) {
         clientID        : configAuth.facebookAuth.clientID,
         clientSecret    : configAuth.facebookAuth.clientSecret,
         callbackURL     : configAuth.facebookAuth.callbackURL,
+        profileFields: ['id', 'displayName', 'photos', 'email'],
         passReqToCallback : true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
 
     },
@@ -99,7 +101,7 @@ module.exports = function(passport) {
                         return done(null, user); // user found, return that user
                     } else {
                         // if there is no user found with that facebook id, create them
-                        createUser(token,profile,"facebook",done);
+                        createUser(token,profile,done);
                     }
 
                 });

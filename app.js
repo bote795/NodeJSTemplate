@@ -51,7 +51,7 @@ app.use('/', routes);
 app.use('/', images);
 app.use('/', groups);
 app.use('/', games);
-
+//adds local, facebook,
 require('./config/passport')(passport);
 
 //mongoose
@@ -70,6 +70,15 @@ app.use(function(req, res, next) {
 // will print stacktrace
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
+    /*
+      to be able to catch mongoose errors which are usually
+      query errors about email duplication
+    */
+    if (err.code == 11000) {
+        req.flash('error',"A user with the given email is already registered"); 
+        res.render('login',{expressFlash:req.flash('error')})
+        return;
+    };
     res.status(err.status || 500);
     res.render('error', {
       message: err.message,
@@ -81,6 +90,15 @@ if (app.get('env') === 'development') {
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
+  /*
+    to be able to catch mongoose errors which are usually
+    query errors about email duplication
+  */
+  if (err.code == 11000) {
+      req.flash('error',"A user with the given email is already registered"); 
+      res.render('login',{expressFlash:req.flash('error')})
+      return;
+  };
   res.status(err.status || 500);
   res.render('error', {
     message: err.message,
