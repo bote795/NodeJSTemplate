@@ -281,10 +281,10 @@ router.route('/register')
 */
 router.route('/auth/google')
   .get( passport.authenticate('google', 
-    { successReturnToOrRedirect: true,scope : ['profile', 'email'] }));
+    { successReturnToOrRedirect: "/",scope : ['profile', 'email'] }));
 
 router.route('/auth/google/callback')
-  .get(passport.authenticate('google', { successReturnToOrRedirect: true,
+  .get(passport.authenticate('google', { successReturnToOrRedirect: "/",
     successRedirect : '/',
     failureRedirect: '/login' 
   }))
@@ -294,10 +294,10 @@ router.route('/auth/google/callback')
 */
 router.route('/auth/facebook')
   .get(passport.authenticate('facebook', 
-    {successReturnToOrRedirect: true, scope : 'email' }));
+    {successReturnToOrRedirect: "/", scope : 'email' }));
     // handle the callback after facebook has authenticated the user
 router.route('/auth/facebook/callback')
-  .get(passport.authenticate('facebook', {successReturnToOrRedirect: true,
+  .get(passport.authenticate('facebook', {successReturnToOrRedirect: "/",
         successRedirect : '/',
         failureRedirect : '/login'
     }));
@@ -455,7 +455,7 @@ router.route('/login')
     res.render('login', { user : req.user,  expressFlash:req.flash('error')});
   })
 
-  .post(passport.authenticate('local',{ successReturnToOrRedirect: true, failureRedirect: '/login',failureFlash: true  }), function(req, res) {
+  .post(passport.authenticate('local',{ successReturnToOrRedirect: "/", failureRedirect: '/login',failureFlash: true  }), function(req, res) {
     res.redirect('/');
   });
 
