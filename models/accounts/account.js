@@ -20,7 +20,16 @@ var Account = new Schema({
   	resetPasswordExpires: Date,
     activateAccountToken: String,
     activateAccountExpires: Date,
-    accountActivated: {type: Boolean, required: true, default: false}
+    accountActivated: {type: Boolean, required: true, default: false},
+    facebook: {
+        id: String,
+        token: String
+    },
+    google : {
+        id: String,
+        token: String
+    }
+
 });
 
 Account.plugin(passportLocalMongoose);

@@ -80,14 +80,14 @@ router.get('/', function (req, res) {
 /*
   Route to be able to see other peoples profiles
 */
-router.route('/:id/public')
+router.route('/:username/public')
   .get(function(req, res) {
     var isFollowing = false;
     var stats={};
     stats.countFollowers = 0;
     stats.countFollowing = 0;   
 
-    User.get(req.params.id,function (err, user) {
+    User.get(req.params.username,function (err, user) {
       if (err) {
         req.flash('error', "User doesn't exist")
         return res.redirect('/');  
@@ -207,8 +207,7 @@ router.route('/register')
   .get( function(req, res) {
     res.render('user/register', {expressFlash : req.flash('error') });
   })
-
-/*
+  /*
   Creating a user and sending an activation Email with a token
   that expires in one hour.
 */
@@ -280,6 +279,17 @@ router.route('/register')
           */
       
   });
+router.route('/auth/google')
+  .get( passport.authenticate('google', 
+    { scope : ['profile', 'email'] }));
+
+router.route('/auth/google/callback')
+  .get(passport.authenticate('google', { 
+    successRedirect : '/',
+    failureRedirect: '/login' 
+  }))
+
+
 /*
   Activates account for user
 */

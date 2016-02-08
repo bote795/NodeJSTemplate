@@ -14,9 +14,8 @@ var images = require('./routes/images');
 var games = require('./routes/games');
 var groups = require('./routes/groups');
 var flash = require('express-flash');
-
 var app = express();
-
+// load the auth variables
 // view engine setup
 app.engine('html', hbs.__express);
 app.set('view engine', 'hbs');
@@ -52,11 +51,8 @@ app.use('/', routes);
 app.use('/', images);
 app.use('/', groups);
 app.use('/', games);
-//passport config
-var Account = require('./models/accounts/account');
-passport.use(new LocalStrategy(Account.authenticate()));
-passport.serializeUser(Account.serializeUser());
-passport.deserializeUser(Account.deserializeUser());
+
+require('./config/passport')(passport);
 
 //mongoose
 mongoose.connect(process.env.DB ||'mongodb://localhost/gameRecords');
