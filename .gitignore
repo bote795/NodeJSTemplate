@@ -4,3 +4,4 @@ node_modules
 /config/auth.js
 /bin/key.pem
 /bin/cert.pem
+/config/credentials.csv
