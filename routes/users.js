@@ -239,7 +239,7 @@ router.route('/register')
             nodemailerMailgun.use('compile',hbs(options));
             var mailOptions = {
               to: user.email,
-              from: 'passwordreset@demo.com',    //change from
+              from: configAuth.emailFrom,    //change from
               subject: 'GameRecords Activation email', //change the subject
               template: 'accountConfirmation',
               context: {
@@ -371,7 +371,7 @@ router.route('/activate')
         nodemailerMailgun.use('compile',hbs(options));
         var mailOptions = {
           to: user.email,
-          from: 'passwordreset@demo.com',    //change from
+          from: configAuth.emailFrom,    //change from
           subject: 'GameRecords Activation email', //change the subject
           template: 'accountConfirmation',
           context: {
@@ -505,7 +505,7 @@ router.route('/forgot')
           nodemailerMailgun.use('compile',hbs(options));
           var mailOptions = {
             to: user.email,
-            from: 'passwordreset@demo.com',    //change from
+            from: configAuth.emailFrom,    //change from
             subject: 'Node.js Password Reset', //change the subject
             template: 'forgotePass',
             context: {
@@ -579,7 +579,7 @@ router.route('/reset/:token')
           nodemailerMailgun.use('compile',hbs(options));
           var mailOptions = {
             to: user.email,
-            from: 'passwordreset@demo.com',
+            from: configAuth.emailFrom,
             subject: 'Your password has been changed',
             template: 'confirmationReset',
             context: {
