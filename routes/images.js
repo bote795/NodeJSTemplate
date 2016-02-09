@@ -26,6 +26,9 @@ router.route('/images/:id')
             if(err) {
                 res.send(err);
             }
+            if (image.remote) {
+                return res.redirect(image.link);
+            }
             res.setHeader('Content-Type', image.mimetype)
             var filePath = image.path;
             fs.createReadStream(filePath).pipe(res);

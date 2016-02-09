@@ -3,6 +3,7 @@ var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
 var configAuth = require('./auth');
 var User = require('./../models/accounts/account'),
+    Image = require('./../models/images/image'),
     nodemailer = require("nodemailer"),
     hbsMailer = require('nodemailer-express-handlebars'),
     Account = require('./../models/accounts/account');
@@ -41,12 +42,33 @@ function createUser(token,profile,done)
     newUser.username  = profile.displayName;
     newUser.email = profile.emails[0].value; // pull the first email
         // save the user
-    newUser.save(function(err) {
-        if (err)
-            return done(err);
-        welcomeEmail(newUser);
-        return done(null, newUser);
-    });
+    if (profile.photos.length > 0) {
+      var newImage  = new Image();
+      newImage.remote = true;
+      newImage.link= profile.photos[0].value;
+      newImage.save(function(err){
+        if (err) {
+          return done(err)
+        }
+        //saves imadeid to newuser
+        newUser.image=newImage._id;
+        newUser.avatars=[newImage._id];
+        newUser.save(function(err) {
+          if (err)
+              return done(err);
+          welcomeEmail(newUser);
+          return done(null, newUser);
+        });
+      });
+    }  
+    else{
+      newUser.save(function(err) {
+          if (err)
+              return done(err);
+          welcomeEmail(newUser);
+          return done(null, newUser);
+      });
+    }
 }
 
 function welcomeEmail (user) {

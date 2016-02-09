@@ -9,6 +9,8 @@ var Image = new Schema({
 	filename: String,
 	path: String,
 	size: Number,
+	remote: {type: Boolean, required: true, default: false},
+	link: String,
     created_at: Date,
   	updated_at: Date
 });
