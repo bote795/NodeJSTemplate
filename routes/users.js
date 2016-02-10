@@ -17,17 +17,13 @@ var async = require("async"),
     connTemplate = fs.readFileSync(__dirname + '/../views/user/_connectionsInfo.hbs', 'utf8'),
     miniTemplate = fs.readFileSync(__dirname + '/../views/user/_userMiniTemplate.hbs', 'utf8');
     handlebars.registerPartial('connections', connTemplate); 
-    handlebars.registerPartial('userMini', miniTemplate); 
+    handlebars.registerPartial('userMini', miniTemplate),
+    ses = require('nodemailer-ses-transport'); 
 
-var configsMail = {
-    service: configAuth.mailer.service,
-    auth: {
-    user:  configAuth.mailer.auth.user,
-    pass: configAuth.mailer.auth.pass
-  }
-}
-var nodemailerMailgun = nodemailer.createTransport(configsMail);
-
+var nodemailerMailgun = nodemailer.createTransport(ses({
+    accessKeyId: configAuth.mailer.auth.key,
+    secretAccessKey: configAuth.mailer.auth.secret_key
+}));
 //parameters to upload files
 var uploading = multer({
   dest: __dirname + '/../public/uploads/',

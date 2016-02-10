@@ -8,12 +8,11 @@ var User = require('./../models/accounts/account'),
     hbsMailer = require('nodemailer-express-handlebars'),
     Account = require('./../models/accounts/account'),
     ses = require('nodemailer-ses-transport');
-    
+
 var nodemailerMailgun = nodemailer.createTransport(ses({
     accessKeyId: configAuth.mailer.auth.key,
     secretAccessKey: configAuth.mailer.auth.secret_key
 }));
-//var nodemailerMailgun = nodemailer.createTransport(configsMail);
 
 function createUser(token,profile,done)
 {
