@@ -50,3 +50,7 @@ project
     │   index.js      -- contians functions to call db for games
     │   games.js      -- contains the mongoose shcema
 ```
+
+To be able to run admin system
+follow instructions on 
+https://github.com/andzdroid/mongo-express
