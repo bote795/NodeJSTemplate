@@ -6,16 +6,14 @@ var User = require('./../models/accounts/account'),
     Image = require('./../models/images/image'),
     nodemailer = require("nodemailer"),
     hbsMailer = require('nodemailer-express-handlebars'),
-    Account = require('./../models/accounts/account');
-
-var configsMail = {
-    service: configAuth.mailer.service,
-    auth: {
-    user:  configAuth.mailer.auth.user,
-    pass: configAuth.mailer.auth.pass
-  }
-}
-var nodemailerMailgun = nodemailer.createTransport(configsMail);
+    Account = require('./../models/accounts/account'),
+    ses = require('nodemailer-ses-transport');
+    
+var nodemailerMailgun = nodemailer.createTransport(ses({
+    accessKeyId: configAuth.mailer.auth.key,
+    secretAccessKey: configAuth.mailer.auth.secret_key
+}));
+//var nodemailerMailgun = nodemailer.createTransport(configsMail);
 
 function createUser(token,profile,done)
 {
@@ -83,19 +81,20 @@ function welcomeEmail (user) {
          extName: '.hbs'
       };
     nodemailerMailgun.use('compile',hbsMailer(options));
+
     var mailOptions = {
       to: user.email,
-      from: 'welcome@GameRecords.com',    //change from
+      from: configAuth.emailFrom,    //change from
       subject: 'GameRecords welcome email', //change the subject
       template: 'accountConfirmation',
       context: {
         title: "Game Records",
       }
     };
+    console.log(mailOptions);
     nodemailerMailgun.sendMail(mailOptions, function(err,info) {
       if (err) 
       {
-         req.flash('error', "Error with sending welcome Email")
           console.log("Error");
           console.log(err);
       }
