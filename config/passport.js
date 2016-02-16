@@ -18,7 +18,6 @@ function createUser(token,profile,done)
 {
 	console.log(profile);
 	var key = "google";
-    //TODO learn how to save images from other websites locally
 	//google
 		//photos object
 		//photos[0].value url
@@ -39,7 +38,7 @@ function createUser(token,profile,done)
     newUser.username  = profile.displayName;
     newUser.email = profile.emails[0].value; // pull the first email
         // save the user
-    if (profile.photos.length > 0) {
+    if (profile.photos.length > 0) { // save the image
       var newImage  = new Image();
       newImage.remote = true;
       newImage.link= profile.photos[0].value;
