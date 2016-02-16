@@ -1,7 +1,8 @@
 //change name to auth,js
+var dbName = "gameRecords";
 module.exports = {
-    
-     db: process.env.DB ||'mongodb://'+ip+'/<name>',
+     dbName: dbName,
+     db: process.env.DB ||'mongodb://localhost/'+ dbName,
      app: {
         name: 'NAME OF APP'
       },
@@ -35,5 +36,16 @@ module.exports = {
           secret_key: 'YOUR_AMAZON_SECRET_KEY'
         },
     }, 
-    secret: 'SOME_TOKEN_SECRET'
+    secret: 'SOME_TOKEN_SECRET',
+    //to navigate to this go to /mongo_express
+    mongoAdmin: {
+            SSL_CRT_PATH: __dirname +'/../cert.pem',
+            SSL_KEY_PATH: __dirname +'/../key.pem',
+            SSL_ENABLED: true,
+            MONGODB_ENABLE_ADMIN: true,
+            auth: {
+                user: "ENTER USERNAME HERE",
+                pass: "ENTER PASSWORD HERE"
+            }
+    }    
 };
