@@ -61,7 +61,7 @@ router.get('/', function (req, res) {
           if ('following' in req.user) 
             stats.countFollowers = req.user.followers.length;
         };
-        res.render('user/index', { title: "Game Records",
+        res.render('user/index', { title: configAuth.app.name,
           user : req.user, 
           groups: data, 
           expressFlash: req.flash('error'),
@@ -176,7 +176,7 @@ router.route('/:id/followers')
   .get(function(req,res) {
     User.getUsers(req.params.id,"followers",function(err,user) {
 
-        res.render('user/followers', { title: "Game Records",
+        res.render('user/followers', { title: configAuth.app.name,
           user : req.user, 
           expressFlash: req.flash('error'),
           user: user });
@@ -188,7 +188,7 @@ router.route('/:id/followers')
 router.route('/:id/following')
   .get(function(req,res) {
      User.getUsers(req.params.id,"following",function(err,user) {
-        res.render('user/following', { title: "Game Records",
+        res.render('user/following', { title: configAuth.app.name,
           user : req.user, 
           expressFlash: req.flash('error'),
           user: user });
@@ -197,7 +197,7 @@ router.route('/:id/following')
 //make an account
 router.route('/register')
   .get( function(req, res) {
-    res.render('user/register', {expressFlash : req.flash('error') });
+    res.render('user/register', {expressFlash : req.flash('error') , title: configAuth.app.name});
   })
   /*
   Creating a user and sending an activation Email with a token
@@ -236,9 +236,10 @@ router.route('/register')
             var mailOptions = {
               to: user.email,
               from: configAuth.emailFrom,    //change from
-              subject: 'GameRecords Activation email', //change the subject
+              subject: configAuth.app.name +'Activation email', //change the subject
               template: 'accountConfirmation',
               context: {
+                title: configAuth.app.name,
                 host: req.headers.host,
                 token: token
               }
@@ -368,7 +369,7 @@ router.route('/activate')
         var mailOptions = {
           to: user.email,
           from: configAuth.emailFrom,    //change from
-          subject: 'GameRecords Activation email', //change the subject
+          subject: configAuth.app.name +'Activation email', //change the subject
           template: 'accountConfirmation',
           context: {
             host: req.headers.host,
@@ -454,7 +455,7 @@ router.route('/editPass')
     });
 router.route('/login')
   .get(function(req, res) {
-    res.render('login', { user : req.user,  expressFlash:req.flash('error')});
+    res.render('login', { user : req.user,  expressFlash:req.flash('error'), title: configAuth.app.name});
   })
 
   .post(passport.authenticate('local',{ successReturnToOrRedirect: "/", failureRedirect: '/login',failureFlash: true  }), function(req, res) {

@@ -24,7 +24,7 @@ if (process.env.VCAP_SERVICES) {
     password: configAuth.mongoAdmin.auth.pass,
     port:     27017,
     ssl:      false,
-    url:      '"mongodb://localhost/:27017/gameRecords',
+    url:      '"mongodb://localhost/:27017/'+configAuth.dbName,
     username: configAuth.mongoAdmin.auth.admin,
   };
 }

@@ -3,9 +3,10 @@
 /**
  * Module dependencies.
  */
+var configAuth = require('./../config/auth');
 
 var app = require('../app');
-var debug = require('debug')('gameRecords:server');
+var debug = require('debug')(configAuth.dbName+':server');
 var https = require('https');
 var fs = require('fs');
 

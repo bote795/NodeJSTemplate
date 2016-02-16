@@ -83,10 +83,10 @@ function welcomeEmail (user) {
     var mailOptions = {
       to: user.email,
       from: configAuth.emailFrom,    //change from
-      subject: 'GameRecords welcome email', //change the subject
+      subject: configAuth.app.name+' welcome email', //change the subject
       template: 'accountConfirmation',
       context: {
-        title: "Game Records",
+        title: configAuth.app.name,
       }
     };
     console.log(mailOptions);
