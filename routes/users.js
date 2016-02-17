@@ -6,24 +6,10 @@ var router = express.Router();
 var Group = require('../models/groups/index');
 var multer = require('multer');
 var configAuth = require('../config/auth');
-var async = require("async"),
-    crypto = require("crypto"),
-    nodemailer = require("nodemailer"),
-    mg = require('nodemailer-mailgun-transport'),
-    hbs = require('nodemailer-express-handlebars'),
-    fs = require('fs'),
+var email = require('../models/accounts/email'),
     handlebars = require('hbs'),
-    middleware = require('../middleware/authentication'),
-    connTemplate = fs.readFileSync(__dirname + '/../views/user/_connectionsInfo.hbs', 'utf8'),
-    miniTemplate = fs.readFileSync(__dirname + '/../views/user/_userMiniTemplate.hbs', 'utf8');
-    handlebars.registerPartial('connections', connTemplate); 
-    handlebars.registerPartial('userMini', miniTemplate),
-    ses = require('nodemailer-ses-transport'); 
+    middleware = require('../middleware/authentication');
 
-var nodemailerMailgun = nodemailer.createTransport(ses({
-    accessKeyId: configAuth.mailer.auth.key,
-    secretAccessKey: configAuth.mailer.auth.secret_key
-}));
 //parameters to upload files
 var uploading = multer({
   dest: __dirname + '/../public/uploads/',
@@ -204,73 +190,7 @@ router.route('/register')
   that expires in one hour.
 */
   .post(uploading.single('image'), function(req, res) {
-          async.waterfall([
-          function(done) {
-            crypto.randomBytes(20, function(err, buf) {
-              var token = buf.toString('hex');
-              done(err, token);
-            });
-          },
-          function(token, done) {
-            req.body.token = token;
-            User.create(req, function(err, account) {
-              if (err) {
-                  return res.render('user/register', { account : account ,
-                   expressFlash : req.flash('error') });
-              }
-              done(err, token, account);
-            });
-          },
-          function(token, user, done) {
-            var options = {
-                 viewEngine: {
-                     extname: '.hbs',
-                     layoutsDir: 'views/email/',
-                     defaultLayout : 'accountConfirmation',
-                     partialsDir : 'views/email/partials/'
-                 },
-                 viewPath: 'views/email/',
-                 extName: '.hbs'
-              };
-            nodemailerMailgun.use('compile',hbs(options));
-            var mailOptions = {
-              to: user.email,
-              from: configAuth.emailFrom,    //change from
-              subject: configAuth.app.name +'Activation email', //change the subject
-              template: 'accountConfirmation',
-              context: {
-                title: configAuth.app.name,
-                host: req.headers.host,
-                token: token
-              }
-            };
-            nodemailerMailgun.sendMail(mailOptions, function(err,info) {
-              if (err) 
-              {
-                 req.flash('error', "Error with sending confirmation Email")
-                  console.log("Error");
-                  console.log(err);
-              }
-              else
-              {
-                  req.flash('success', 'An e-mail has been sent to ' + user.email + ' with further instructions.');
-                  console.log('An e-mail has been sent to ' + user.email + ' with further instructions.');
-                  console.log('Response' + info);
-              }
-              done(err, 'done');
-            });
-          }
-          ], 
-          function(err) {
-          if (err) return res.render('user/register', {expressFlash: req.flash("error")});;
-          res.render('user/register', {expressFlash: req.flash("success")});
-          });
-          /*
-          passport.authenticate('local')(req, res, function () {
-              res.redirect('/');
-          });
-          */
-      
+      email.register(req,res);
   });
 
 /*
@@ -336,67 +256,7 @@ router.route('/activate')
     res.render('user/activate')
   })
   .post(function(req,res) {
-      async.waterfall([
-      function(done) {
-        crypto.randomBytes(20, function(err, buf) {
-          var token = buf.toString('hex');
-          done(err, token);
-        });
-      },
-      function(token, done) {
-
-        User.findByEmailToken(req.body.email,token, function(err, token, account) {
-          if (err) {
-              req.flash('error', " No account with that email was found");
-              return res.render('back');
-          }
-          done(err, token, account);
-        },true);
-      },
-      function(token, user, done) {
-        //options for rendering hbs
-        var options = {
-             viewEngine: {
-                 extname: '.hbs',
-                 layoutsDir: 'views/email/',
-                 defaultLayout : 'accountConfirmation',
-                 partialsDir : 'views/email/partials/'
-             },
-             viewPath: 'views/email/',
-             extName: '.hbs'
-          };
-        nodemailerMailgun.use('compile',hbs(options));
-        var mailOptions = {
-          to: user.email,
-          from: configAuth.emailFrom,    //change from
-          subject: configAuth.app.name +'Activation email', //change the subject
-          template: 'accountConfirmation',
-          context: {
-            host: req.headers.host,
-            token: token
-          }
-        };
-        nodemailerMailgun.sendMail(mailOptions, function(err,info) {
-          if (err) 
-          {
-             req.flash('error', "Error with sending confirmation Email")
-              console.log("Error");
-              console.log(err);
-          }
-          else
-          {
-              req.flash('success', 'An e-mail has been sent to ' + user.email + ' with further instructions.');
-              console.log('An e-mail has been sent to ' + user.email + ' with further instructions.');
-              console.log('Response' + info);
-          }
-          done(err, 'done');
-        });
-      }
-      ], 
-      function(err) {
-      if (err) return res.render('user/activate', {expressFlash: req.flash("error")});;
-      res.render('user/activate', {expressFlash: req.flash("success")});
-      });
+      email.newActivate(req,res);
   })
 //routes to edit user basic info
 router.route('/edit')
@@ -472,66 +332,7 @@ router.route('/forgot')
         res.render('forgot',{expressFlash: req.flash("error")});
     })
     .post(function(req, res) {
-        async.waterfall([
-        function(done) {
-          crypto.randomBytes(20, function(err, buf) {
-            var token = buf.toString('hex');
-            done(err, token);
-          });
-        },
-        function(token, done) {
-          User.findByEmailToken(req.body.email, token,function(err,token,user) {
-            if (err) {
-              req.flash('error', "Token or email not found")
-              return res.render('forgot', {expressFlash: req.flash("error")});
-            };
-            done(err, token, user);
-          });
-        },
-        function(token, user, done) {
-            var options = {
-             viewEngine: {
-                 extname: '.hbs',
-                 layoutsDir: 'views/email/',
-                 defaultLayout : 'forgotePass',
-                 partialsDir : 'views/email/partials/'
-             },
-             viewPath: 'views/email/',
-             extName: '.hbs'
-         };
-          nodemailerMailgun.use('compile',hbs(options));
-          var mailOptions = {
-            to: user.email,
-            from: configAuth.emailFrom,    //change from
-            subject: 'Node.js Password Reset', //change the subject
-            template: 'forgotePass',
-            context: {
-              host: req.headers.host,
-              token: token
-            }
-          };
-          nodemailerMailgun.sendMail(mailOptions, function(err,info) {
-            //req.flash('info', 'An e-mail has been sent to ' + user.email + ' with further instructions.');
-            if (err) 
-            {
-               req.flash('error', "Error with sending Email")
-                console.log("Error");
-                console.log(err);
-            }
-            else
-            {
-                req.flash('success', 'An e-mail has been sent to ' + user.email + ' with further instructions.');
-                console.log('An e-mail has been sent to ' + user.email + ' with further instructions.');
-                console.log('Response' + info);
-            }
-            done(err, 'done');
-          });
-        }
-      ], function(err) {
-        if (err) return res.render('forgot', {expressFlash: req.flash("error")});;
-        res.render('forgot', {expressFlash: req.flash("success")});
-      });        
-
+        email.forgotePass(req,res,api);
     });
 router.route('/reset/:token')
     .get(function(req, res) {
@@ -547,61 +348,6 @@ router.route('/reset/:token')
       })
     })
     .post(function(req, res) {
-      async.waterfall([
-        function(done) {
-          User.resetPassword(req.params.token, req.body.password, function (err, user) {
-            if (err) {
-              req.flash('error',"Token was invalid");
-              return res.redirect('back');
-            };
-            req.logIn(user, function(err) {
-                if (err) {
-                  return res.redirect('back');
-                };
-                done(null, user);
-            });
-          });
-        },
-        function(user, done) {
-            var options = {
-               viewEngine: {
-                   extname: '.hbs',
-                   layoutsDir: 'views/email/',
-                   defaultLayout : 'confirmationReset',
-                   partialsDir : 'views/email/partials/'
-               },
-               viewPath: 'views/email/',
-               extName: '.hbs'
-           };
-          nodemailerMailgun.use('compile',hbs(options));
-          var mailOptions = {
-            to: user.email,
-            from: configAuth.emailFrom,
-            subject: 'Your password has been changed',
-            template: 'confirmationReset',
-            context: {
-              email: user.email
-            }
-            };
-          nodemailerMailgun.sendMail(mailOptions, function(err, info) {
-            //req.flash('success', 'Success! Your password has been changed.');
-           if (err) 
-            {
-                console.log("Error");
-                req.flash('error',"An error occurred");
-                console.log(err);
-            }
-            else
-            {
-                console.log('An e-mail has been sent to ' + user.email + ' with further instructions.');
-                req.flash('success', 'An e-mail has been sent to ' + user.email + ' with further instructions.');
-                console.log('Response' + info);
-            }
-            done(err, 'done');
-          });
-        }
-      ], function(err) {
-        res.redirect('/');
-      });
+      email.resetPass(req,res);
     });
 module.exports = router;
