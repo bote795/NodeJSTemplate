@@ -26,6 +26,7 @@ Will utilize  Mango, Express, Node, Handlebars, and passport.
 * Facebook and google Auth
 * All authentication is done with Passportjs
 * https
+* UI admin panel for interacting with mongo console
 
 #### <b> will also come with some routes for groups, and games since was original project</b>
 
