@@ -28,6 +28,7 @@ module.exports = {
     },
     emailFrom: 'SENDER EMAIL ADDRESS', //  sender address like ABC <abc@example.com>
     mailer: {
+        amazon: false, // using amazon SES
         service: 'SERVICE_PROVIDER', // Gmail, SMTP
         auth: {
           user:  'EMAIL_ID',

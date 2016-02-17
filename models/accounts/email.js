@@ -14,10 +14,25 @@ var configAuth = require('../../config/auth'),
     var ses = require('nodemailer-ses-transport'),
 	Account = require('./account'),
 	User = require('./index');
-    var nodemailerMailgun= nodemailer.createTransport(ses({
-    	accessKeyId: configAuth.mailer.auth.key,
-    	secretAccessKey: configAuth.mailer.auth.secret_key
-	}));
+    var nodemailerMailgun;
+    if (configAuth.mailer.amazon) 
+    {
+        nodemailerMailgun= nodemailer.createTransport(ses({
+            accessKeyId: configAuth.mailer.auth.key,
+            secretAccessKey: configAuth.mailer.auth.secret_key
+        }));        
+    }
+    else
+    {
+        nodemailerMailgun= nodemailer.createTransport({
+            service: configAuth.mailer.service,
+            auth: {
+                user:  configAuth.mailer.auth.user,
+                pass: configAuth.mailer.auth.pass
+            }   
+        });
+    }
+
     function defaultVars (api) {
         return api = typeof api !== 'undefined' ? api : false;
     }
