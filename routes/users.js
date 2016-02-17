@@ -28,8 +28,6 @@ var uploading = multer({
   uploading.single('image') = used when form has a file
   image is the name of the field of the file
 */
-
-
 router.get('/', function (req, res) {
     var stats={};
     stats.countFollowers = 0;
