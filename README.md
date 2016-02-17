@@ -1,25 +1,45 @@
-#GameRecords
+#Nodejs Temaplte
 
 #Project Information 
 
-##Goal
+###subGoal startedwith
 Project that will allow users to create groups and register games to keep win and lose ratios.
 Pratice using Mango, Express, Node, Handlebars and passport.
 
+##Goal
+Turned into creating the basics usage for a nodejs based system that has most user basic functionality
 
 ##Description
-Project that will allow users to create groups and register games to keep win and lose ratios.
+Project that will allow users to create groups and register games.
 Will utilize  Mango, Express, Node, Handlebars, and passport.
+
+###Features
+* Being able to create a user  
+* Edit user information
+* Send email notifications with different services including Amazon SES
+* Email templates are made with handlebars
+* Flash for errors/success messages
+* Forgote password
+* User verification
+* Following users
+* User profiles
+* Facebook and google Auth
+* All authentication is done with Passportjs
+* https
+
+#### <b> will also come with some routes for groups, and games since was original project</b>
 
 
 Project Strucutre:
 ```
 project
 │   README.md
-│   file001.txt    
+│     
 │
 │
 └───bin
+|   certifications
+|   www contains http server
 │     
 └───views
 │   |   index.hbs
@@ -37,10 +57,40 @@ project
 |   │   edit.hbs
 |   │   new.hbs
 |   |   index.hbs  --details of group
+|   ├───email
+|   |   email templates
+|   |
+|   |
+|   ├───user
+|   |   user related routes
+|   |
+└───config
+|   | auth.js   --contains info from authEx.js keys etc
+|   | passport.js -- contains different login strategys using passport and welcome email
+|
+|
+└───middleware
+|   | authentication.js  contains midleware function to check if user is signed in and activated
+|
+└───public
+|   css/js files that wil be included in views
+|
+└───views
+│   ├───user
+|   ├───email
+|   ├───game
+|   |_form.hbs has form for edit/new
+|   |_edit.hbs
+|   |_new.hbs
+|   |
+|   ├───user
+|       each function has views that have to do with each views
+|
 └───models
     │
     ├───accounts
     │   accounts.js  -- contains the mongoose schema
+    |   email.js     -- contains functions for sending emails
     │
     └───games
     │   index.js      -- contians functions to call db for games
