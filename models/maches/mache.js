@@ -12,6 +12,9 @@ var Mache = new Schema({
     	type: mongoose.Schema.Types.ObjectId, 
 		ref: 'Element'
     }],
+    thumbnail: {
+    	location: String
+    },
     created_on: Date,
   	last_modified: Date
 });
@@ -27,5 +30,15 @@ Mache.pre('save', function(next){
 		this.created_on = currentDate;
 
 	next();
+});
+Mache.virtual('popElement').get(function(id){
+	Mache
+		.findOne({_id: id})
+		.populate('elements')
+		.exec(function(err,mache){
+			if(err) return err;
+			return mache;
+		});
+	
 });
 module.exports = mongoose.model('Mache', Mache);
