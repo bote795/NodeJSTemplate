@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var Mache = new Schema({
     title: String,
-    desc: String,
+    description: String,
     creator: { 
 		type: mongoose.Schema.Types.ObjectId, 
 		ref: 'Account'},
