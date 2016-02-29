@@ -1,4 +1,6 @@
 var mongoose = require('mongoose');
+var deepPopulate = require('mongoose-deep-populate')(mongoose);
+
 var Schema = mongoose.Schema;
 var Element = new Schema({
 	type: String,
@@ -11,12 +13,13 @@ var Element = new Schema({
     ], 
     clipping: {
     	type: mongoose.Schema.Types.ObjectId, 
-		ref: 'clipping'
+		ref: 'Clipping'
     },
     //groups of elements if element is dervied for a bigger group
     children: [
     	{}
     ],
+    locked: Boolean,
     created_on: Date,
   	last_modified: Date
 });
@@ -33,4 +36,6 @@ Element.pre('save', function(next){
 
 	next();
 });
+Element.plugin(deepPopulate);
+
 module.exports = mongoose.model('Element', Element);

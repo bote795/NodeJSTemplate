@@ -13,6 +13,7 @@ var routes = require('./routes/users');
 var images = require('./routes/images');
 var games = require('./routes/games');
 var groups = require('./routes/groups');
+var maches = require('./routes/mache');
 var flash = require('express-flash');
 var configAuth = require('./config/auth');
 var mongo_express = require('mongo-express/lib/middleware');
@@ -51,6 +52,7 @@ app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/mongo_express', mongo_express(mongo_express_config));
 
+app.use('/api/v1', maches);
 app.use('/', routes);
 app.use('/', images);
 app.use('/', groups);

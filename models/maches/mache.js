@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var deepPopulate = require('mongoose-deep-populate')(mongoose);
 var Schema = mongoose.Schema;
 var Mache = new Schema({
     title: String,
@@ -31,14 +32,5 @@ Mache.pre('save', function(next){
 
 	next();
 });
-Mache.virtual('popElement').get(function(id){
-	Mache
-		.findOne({_id: id})
-		.populate('elements')
-		.exec(function(err,mache){
-			if(err) return err;
-			return mache;
-		});
-	
-});
+Mache.plugin(deepPopulate);
 module.exports = mongoose.model('Mache', Mache);
