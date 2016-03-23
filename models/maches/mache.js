@@ -9,13 +9,14 @@ var Mache = new Schema({
 		ref: 'Account'},
 	visibility: String,
 	background_color: String,
-	elements: [{
+	children: [{
     	type: mongoose.Schema.Types.ObjectId, 
 		ref: 'Element'
     }],
     thumbnail: {
     	location: String
     },
+    tags: [ { String}],
     created_on: Date,
   	last_modified: Date
 });

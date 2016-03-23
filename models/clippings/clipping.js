@@ -3,7 +3,8 @@ var deepPopulate = require('mongoose-deep-populate')(mongoose);
 //Schema.Types.Mixed
 var Schema = mongoose.Schema;
 var Clipping = new Schema({
-	type: Schema.Types.Mixed
+	clip: Schema.Types.Mixed
 },{strict: false});
+Clipping.plugin(deepPopulate);
 
 module.exports = mongoose.model('Clipping', Clipping);

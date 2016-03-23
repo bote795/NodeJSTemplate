@@ -1,16 +1,26 @@
 var Mache = require('./mache');
 var Element = require('../elements/index');
 var Clipping = require('../clippings/index');
+var simpl = require('../../middleware/simplBase.js');
 
 var macheFields = ["title", "description", "visibility", "background_color", "destination",
 "created_on", "last_modified"];
 module.exports = {
+	/**
+	 * [oldCreate uses old api to create new api mache]
+	 * @param  {[type]}   oldFormat [serialized old api mache]
+	 * @param  {Function} cb        [callback function]
+	 * @return {[type]}             [no return type]
+	 */
 	oldCreate: function(oldFormat,cb) {
 		oldFormat= (oldFormat != null) ? String(oldFormat) : null;
 		if (oldFormat == null) {
 			return;
 		};
-		var objectMache = JSON.parse(oldFormat);
+		//need mache to get all data
+		var objectMache = simpl.graphExpand(JSON.parse(oldFormat));
+		//need a copy mache to be able to retrieve metadata 
+		var tempMache = simpl.graphExpand(JSON.parse(oldFormat)).information_composition;
 		objectMache = objectMache.information_composition;
 		var newMache = new Mache();
 
@@ -34,8 +44,11 @@ module.exports = {
 		//element save multi creates
 		//inside of it save clippings as well
 		//then save mache if no errors
-		Element.oldMultiCreate(objectMache ,function(err,listOfIds){
-			newMache.elements = listOfIds;
+		Element.oldMultiCreate(objectMache, tempMache ,function(err,listOfIds){
+			if (err) {
+				cb(err);
+			};
+			newMache.children = listOfIds;
 			newMache.save(function(err, mache) {
 				if(err){
 					cb(err);
@@ -44,14 +57,30 @@ module.exports = {
 			});
 		});
 	},
-	popElement: function (id,cb) {
+	popAll: function (id,cb) {
 		Mache
 			.findById(id)
-			.deepPopulate('elements elements.clipping')
+			.deepPopulate('children children.clipping')
 			.exec(function(err,mache){
 				if(err) cb(err);
 				cb(null,mache);
 			});
+	},
+	// converting new format to old
+	// need to change get metadata out of children objects
+	// into metadata_collection
+	convertToOld: function (mache, cb) {
+		//mache.composition_space
+		for (var i = 0; i < mache.children.length; i++) {
+			var keys =Object.keys(mache.children[i].clipping.clip);
+			var currentChild = mache.children[i];
+			for (var j = 0; j < keys.length; j++) {
+				currentChild["_doc"][keys[j]]=currentChild.clipping.clip[keys[j]];
+			}
+			currentChild["_doc"]["clippingId"]=currentChild.clipping._id;
+			delete currentChild["_doc"].clipping;
+		};
+		cb(null,mache);
 	}
 
 };
