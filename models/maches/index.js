@@ -15,7 +15,7 @@ module.exports = {
 	migrateCreate: function(oldFormat,cb) {
 		oldFormat= (oldFormat != null) ? String(oldFormat) : null;
 		if (oldFormat == null) {
-			return;
+			return Error("not String");
 		};
 		//need mache to get all data
 		var objectMache = simpl.graphExpand(JSON.parse(oldFormat));

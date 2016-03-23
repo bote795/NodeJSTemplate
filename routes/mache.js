@@ -26,7 +26,6 @@ router.route('/mache/:id')
 			mache =maches.convertToOld(mache,function(err,mache){
 				res.json(mache);
 			});
-			//res.json(mache);
 		});
 	})
 

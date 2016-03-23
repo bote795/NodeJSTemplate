@@ -6,6 +6,24 @@ var Q = require('q'),
 var elementFields = ["type", "z_index", "center", "height", "destination",
 "width", "locked","created_on", "last_modified"];
 
+var clippingTypes = [
+	"svg_clipping",
+	"annotation",
+	"html_clipping",
+	"image_clipping",
+	"text_clipping",
+	"text_selfmade",
+	"text_clipping",
+	"image_selfmade",
+	"image_clipping",
+	"video_clipping",
+	"audio_clipping",
+	"mache_clipping",
+	"frame_selfmade",
+	"map_clipping",
+	"doc_clipping"
+];
+
 //function to do a deep compare since normal compare dosn't work
 underscore.mixin({
   'deepIndex': function (array, item) {
@@ -27,7 +45,6 @@ underscore.mixin({
 function migrateCreate (element, clippings, arrayOfMetadata, cb) {
 	var deferred = Q.defer();
 	var newElement = new Element();
-	var temp = element;
 		//import top level fields for clipping
 		for (var i = 0; i < elementFields.length; i++) {
 			if(typeof element[elementFields[i]] !== 'undefined')
@@ -38,7 +55,6 @@ function migrateCreate (element, clippings, arrayOfMetadata, cb) {
 				}
 				else
 					newElement[elementFields[i]] = element[elementFields[i]];
-				delete temp[elementFields[i]];
 			}
 		}
 
@@ -48,20 +64,13 @@ function migrateCreate (element, clippings, arrayOfMetadata, cb) {
 		//children for groups and such
 		newElement.children = element.children;
 
-		delete temp["transforms"];
-		delete temp["children"];
-		
-		//try to find clipping
-		var keys = Object.keys(temp);
-		if (keys > 1) {
-			console.log("has more than 1 key left");
-			deferred.reject(new Error("has more than 1 key left"));
-		};
+		var ElemClip= getClip(element);
+
 		//create an array with just elems and look for one equal to elem
 		//return index of that elem if found or -1 if not
 		var index = underscore.chain(clippings)
 			        .map(function(value){ return value.elem;})
-			        .deepIndex(element)
+			        .deepIndex(ElemClip.elem)
 			        .value();
 		if (index == -1 ) {
 			deferred.reject(Error("clipping not found"));
@@ -81,29 +90,21 @@ function migrateCreate (element, clippings, arrayOfMetadata, cb) {
 
 
 /**
- * [getMetaData retrieve metadata element aka clipping from element since metadata isn't always same
- * have to find it using a different method]
+ * [getMetaData retrieve metadata element aka clipping from element]
  * @param  {[type]} element [description]
  * @return {[type]}         [description]
  */
-function getMetaData(element){
-	//remove all fields that we know exist in that element to be 
-	//able to retrieve field that we don't know name of
-	for (var i = 0; i < elementFields.length; i++) {
-			if(typeof element[elementFields[i]] !== 'undefined')
-			{
-				delete element[elementFields[i]];
-			}
+function getClip(element){
+
+	for (var i = 0; i < clippingTypes.length; i++) {
+		if(clippingTypes[i] in element)
+		{
+			return {key: clippingTypes[i] ,elem: 
+				{[clippingTypes[i]] : element[clippingTypes[i]]}};
 		}
-	delete element["transforms"];
-	delete element["children"];
-	
-	//try to find clipping
-	var keys = Object.keys(element);
-	if (keys > 1) {
-		console.log("has more than 1 key left");
 	};
-	return {key: keys[0] ,elem: element};
+
+	return  {key: null, elem: null };
 }
 module.exports = {
 	/**
@@ -120,7 +121,7 @@ module.exports = {
 		//create a list of all unique clippings
 		var metadataEElements = tempMache.composition_space;
 		for (var i = 0; i < metadataEElements.children.length; i++) {
-			var metadata =getMetaData(metadataEElements.children[i].composition_element);
+			var metadata =getClip(metadataEElements.children[i].composition_element);
 			//if not found add to array
 			if (clippings.indexOf(metadata) ===  -1) {
 				clippings.push(metadata);
