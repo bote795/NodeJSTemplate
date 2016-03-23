@@ -8,7 +8,7 @@ router.route('/mache')
 		res.json("hi");
 	})
 	.post(function(req,res) {
-		maches.oldCreate(req.body.mache,function(err,mache){
+		maches.migrateCreate(req.body.mache,function(err,mache){
 			if (err)
 			{
 				res.json(err);

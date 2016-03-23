@@ -12,7 +12,7 @@ module.exports = {
 	 * @param  {Function} cb        [callback function]
 	 * @return {[type]}             [no return type]
 	 */
-	oldCreate: function(oldFormat,cb) {
+	migrateCreate: function(oldFormat,cb) {
 		oldFormat= (oldFormat != null) ? String(oldFormat) : null;
 		if (oldFormat == null) {
 			return;
