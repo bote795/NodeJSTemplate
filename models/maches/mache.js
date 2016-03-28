@@ -9,15 +9,19 @@ var Mache = new Schema({
 		ref: 'Account'},
 	visibility: String,
 	background_color: String,
-	children: [{
+	composition_space: {
+		children: [{
     	type: mongoose.Schema.Types.ObjectId, 
 		ref: 'Element'
-    }],
+    }]
+	}
+	,
     thumbnail: {
     	location: String
     },
     tags: [ { String}],
     created_on: Date,
+    hash_key: String,
   	last_modified: Date
 });
 //on every save, add the date
