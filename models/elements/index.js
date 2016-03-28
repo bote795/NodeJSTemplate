@@ -38,6 +38,29 @@ underscore.mixin({
   }
 });
 /**
+ * retrieveFields goes through elementFields and checks if
+ * element has that field if it does assigns it to newElement
+ * @param  {[type]} newElement [doc model]
+ * @param  {[type]} element    [object that contains the keys in elementFields]
+ * @return {[type]}            [none]
+ */
+function retrieveFields (newElement, element) {
+	if (element == null) {return;}
+	//import top level fields for element
+	for (var i = 0; i < elementFields.length; i++) {
+		if(typeof element[elementFields[i]] !== 'undefined')
+		{
+			if (elementFields[i] === "created_on" ||
+				elementFields[i] === "last_modified") {
+				newElement[elementFields[i]] = new Date(element[elementFields[i]]);
+			}
+			else
+				newElement[elementFields[i]] = element[elementFields[i]];
+		}
+	}
+}
+
+/**
  * [migrateCreate takes an old element and returns an mongo doc element]
  * @param  {[type]} element 	    [description]
  * @param  {[type]} clippings       [an array full of  all clippings]
@@ -48,46 +71,36 @@ underscore.mixin({
 function migrateCreate (element, clippings, arrayOfMetadata, cb) {
 	var deferred = Q.defer();
 	var newElement = new Element();
-		//import top level fields for clipping
-		for (var i = 0; i < elementFields.length; i++) {
-			if(typeof element[elementFields[i]] !== 'undefined')
-			{
-				if (elementFields[i] === "created_on" ||
-					elementFields[i] === "last_modified") {
-					newElement[elementFields[i]] = new Date(element[elementFields[i]]);
-				}
-				else
-					newElement[elementFields[i]] = element[elementFields[i]];
-			}
-		}
 
-		//transforms
-		newElement.transforms = element.transforms;
+	retrieveFields(newElement,element);
 
-		//children for groups and such
-		newElement.children = element.children;
+	//transforms
+	newElement.transforms = element.transforms;
 
-		var ElemClip= getClip(element);
+	//children for groups and such
+	newElement.children = element.children;
 
-		//create an array with just elems and look for one equal to elem
-		//return index of that elem if found or -1 if not
-		var index = underscore.chain(clippings)
-			        .map(function(value){ return value.elem;})
-			        .deepIndex(ElemClip.elem)
-			        .value();
-		if (index == -1 ) {
-			deferred.reject(Error("clipping not found"));
-		};	        
-		//use that index for the index of metedata docs
-		newElement.clipping = arrayOfMetadata[index]._id;	
-		newElement.save(function(err, element) {
-            if(err) {
-                //cb(err);
-                deferred.reject(err);
-            }
-            //cb(null,element);
-            deferred.resolve(element);
-	   	});
+	var ElemClip= getClip(element);
+
+	//create an array with just elems and look for one equal to elem
+	//return index of that elem if found or -1 if not
+	var index = underscore.chain(clippings)
+		        .map(function(value){ return value.elem;})
+		        .deepIndex(ElemClip.elem)
+		        .value();
+	if (index == -1 ) {
+		deferred.reject(Error("clipping not found"));
+	};	        
+	//use that index for the index of metedata docs
+	newElement.clipping = arrayOfMetadata[index]._id;	
+	newElement.save(function(err, element) {
+        if(err) {
+            //cb(err);
+            deferred.reject(err);
+        }
+        //cb(null,element);
+        deferred.resolve(element);
+   	});
 	return deferred.promise;
 }
 
@@ -108,6 +121,42 @@ function getClip(element){
 	};
 
 	return  {key: null, elem: null };
+}
+
+/**
+ * findById returns Element By Id
+ * @param  {[type]}   id       [Element mongoose Id]
+ * @param  {Function} cb       [callback function]
+ * @return {[err]} err         [Error]
+ * @return {[doc]} element     [Element Doc]
+ */
+function findById(id,cb){
+	Element.findById(id,function(err,element){
+		if (err) {
+			cb(err);
+		}
+		cb(null,element);
+	})
+}
+
+/**
+ * filter check if all keys in object are legal fields
+ * @param  {[type]} elementValues    [Object  that contains members of
+								      Key value pairs with key being changed and new value
+								      { center: 10,10
+								      } ]
+ * @return {[Object]} filteredObject [object that has values already fitlered]
+ */
+function filter(elementValues){
+	var keys = Object.keys(elementValues);
+	var filterEdits = keys.filter(function(value,i){
+		if (elementFields.indexOf(value) > -1) value;
+	});
+	var filteredObject = {};
+	for (var i = 0; i < filterEdits.length; i++) {
+		filteredObject[filterEdits[i]] = elementValues[filterEdits[i]];
+	};
+	return filteredObject;
 }
 module.exports = {
 	/**
@@ -173,14 +222,35 @@ module.exports = {
 			}
 		);
 	},
-	create: function(cb){
 
+	create: function(values,cb){
+		values= (values != null) ? filter(values) : null;
+		var newElement = new Element();
+		retrieveFields(newElement,values);
+		newElement.save(function(err, element) {
+            if(err) {
+                cb(err);
+            }
+            cb(null,element);
+	   	});
 	},
-	edit: function(cb){
-
-	},
-	delete: function(cb){
+	edit: function(id,edits,cb){
+		var filterEdits = filter(edits);
+		Element.findByIdAndUpdate(id, 
+			{ $set: filterEdits}, function (err, element) {
+		  	if (err) cb(err);
+		  	cb(null,elment);
+		});
 		
+	},
+	delete: function(id,cb){
+		Element.remove({
+			_id: id
+		},function(err){
+			if (err) {
+				cb(err);
+			}
+		});
 	}
 
 };

@@ -5,6 +5,47 @@ var simpl = require('../../middleware/simplBase.js');
 
 var macheFields = ["title", "description", "visibility", "background_color", "destination",
 "hash_key","created_on", "last_modified"];
+function findById(id,cb){
+	Mache.findById(id,function(err,mache){
+		if (err) {
+			cb(err);
+		}
+		cb(null,mache);
+	})
+}
+/**
+ * retrieveFields goes through macheFields and checks if
+ * element has that field if it does assigns it to newMache
+ * @param  {[type]} newMache [doc model]
+ * @param  {[type]} element    [object that contains the keys in macheFeilds]
+ * @return {[type]}            [none]
+ */
+function retrieveFields (newMache, element) {
+	if (element == null) {return;}
+	//import top level fields for element
+	for (var i = 0; i < macheFields.length; i++) {
+		if(typeof element[macheFields[i]] !== 'undefined')
+		{
+			if (macheFields[i] === "created_on" ||
+				macheFields[i] === "last_modified") {
+				newMache[macheFields[i]] = new Date(element[macheFields[i]]);
+			}
+			else
+				newMache[macheFields[i]] = element[macheFields[i]];
+		}
+	}
+}
+function filter(arguments){
+	var keys = Object.keys(arguments);
+	var filterEdits = keys.filter(function(value,i){
+		if (macheFields.indexOf(value) > -1) value;
+	});
+	var filteredObject = {};
+	for (var i = 0; i < filterEdits.length; i++) {
+		filteredObject[filterEdits[i]] = arguments[filterEdits[i]];
+	};
+	return filteredObject; 
+}
 module.exports = {
 	/**
 	 * [oldCreate uses old api to create new api mache]
@@ -23,17 +64,7 @@ module.exports = {
 		var newMache = new Mache();
 
 		//import top level fields for mache
-		for (var i = 0; i < macheFields.length; i++) {
-			if(typeof objectMache[macheFields[i]] !== 'undefined')
-			{
-				if (macheFields[i] === "created_on" ||
-					macheFields[i] === "last_modified") {
-					newMache[macheFields[i]] = new Date(objectMache[macheFields[i]]);
-				}
-				else
-					newMache[macheFields[i]] = objectMache[macheFields[i]];
-			}
-		};
+		retrieveFields(newMache, objectMache);
 		//TODO: create user and link mache
 		
 		//retrieve thumbnail
@@ -89,14 +120,46 @@ module.exports = {
 		mache["_doc"]["composition_space"]["children"] = oldChildrenArray;
 		cb(null,{Information_composition: mache});
 	},
-	create: function(cb){
-
+	create: function(values, cb){
+		values= (values != null) ? filter(values) : null;
+		var newMache = new Mache();
+		retrieveFields(newMache,values);
+		newMache.save(function(err, mache) {
+				if(err){
+					cb(err);
+				}
+				cb(null, mache);
+			});
 	},
-	edit: function(cb){
-
+	edit: function(id,edits,cb){
+		var filterEdits = filter(edits);
+		Mache.findByIdAndUpdate(id, 
+			{ $set: filterEdits}, function (err, mache) {
+		  	if (err) cb(err);
+		  	cb(null,mache);
+		});
 	},
 	delete: function(cb){
-		
+		Mache.remove({
+			_id: id
+		},function(err){
+			if (err) {
+				cb(err);
+			}
+		});
+	},
+	createElement: function(id,values,cb){
+		findById(id,function (mache) {
+			Element.create(values,function(err,element){
+				mache.composition_space.children.push(element._id);
+				mache.save(function(err, mache) {
+					if(err){
+						cb(err);
+					}
+					cb(null, element);
+				});
+			})
+		})
 	}
 
 };
