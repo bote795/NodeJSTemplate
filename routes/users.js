@@ -3,7 +3,6 @@ var passport = require('passport');
 var Account = require('../models/accounts/account');
 var User = require('../models/accounts/index');
 var router = express.Router();
-var Group = require('../models/groups/index');
 var multer = require('multer');
 var configAuth = require('../config/auth');
 var email = require('../models/accounts/email'),
@@ -32,25 +31,18 @@ router.get('/', function (req, res) {
     var stats={};
     stats.countFollowers = 0;
     stats.countFollowing = 0;
-    Group.all( function(err, data) {
-        if (err) 
-        {
-            res.json(err);
-        }
-        if (req.isAuthenticated()) {
-          //count number of follers
-          if ('followers' in req.user)
-            stats.countFollowing = req.user.following.length;
-          //count number of people following
-          if ('following' in req.user) 
-            stats.countFollowers = req.user.followers.length;
-        };
-        res.render('user/index', { title: configAuth.app.name,
-          user : req.user, 
-          groups: data, 
-          expressFlash: req.flash('error'),
-          stats: stats });
-    });
+    if (req.isAuthenticated()) {
+      //count number of follers
+      if ('followers' in req.user)
+        stats.countFollowing = req.user.following.length;
+      //count number of people following
+      if ('following' in req.user) 
+        stats.countFollowers = req.user.followers.length;
+    };
+    res.render('user/index', { title: configAuth.app.name,
+      user : req.user, 
+      expressFlash: req.flash('error'),
+      stats: stats });
 });
 
 /*
