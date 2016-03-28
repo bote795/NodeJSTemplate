@@ -88,6 +88,15 @@ module.exports = {
 		};
 		mache["_doc"]["composition_space"]["children"] = oldChildrenArray;
 		cb(null,{Information_composition: mache});
+	},
+	create: function(cb){
+
+	},
+	edit: function(cb){
+
+	},
+	delete: function(cb){
+		
 	}
 
 };

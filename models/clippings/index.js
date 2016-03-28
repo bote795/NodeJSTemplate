@@ -24,5 +24,14 @@ module.exports = {
             }
             cb(null,clip);
 		});
+	},
+	create: function(cb){
+
+	},
+	edit: function(cb){
+
+	},
+	delete: function(cb){
+		
 	}
 };
