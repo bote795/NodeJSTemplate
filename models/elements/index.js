@@ -24,7 +24,7 @@ var clippingTypes = [
 	"doc_clipping"
 ];
 
-//function to do a deep compare since normal compare dosn't work
+//function to do a deep compare since normal compare dosn't return true
 underscore.mixin({
   'deepIndex': function (array, item) {
     var result = -1;
@@ -38,9 +38,12 @@ underscore.mixin({
   }
 });
 /**
- * [migrateCreate takes an old clip and returns a clipping id]
- * @param  {[type]} element [description]
- * @return {[type]}            [description]
+ * [migrateCreate takes an old element and returns an mongo doc element]
+ * @param  {[type]} element 	    [description]
+ * @param  {[type]} clippings       [an array full of  all clippings]
+ * @param  {[type]} arrayOfMetadata [an array full of all clipping docs]
+ * @param  {[function]} cb          [a callback function]
+ * @return {[model]}                [a mongo element doc]
  */
 function migrateCreate (element, clippings, arrayOfMetadata, cb) {
 	var deferred = Q.defer();
@@ -91,8 +94,8 @@ function migrateCreate (element, clippings, arrayOfMetadata, cb) {
 
 /**
  * [getMetaData retrieve metadata element aka clipping from element]
- * @param  {[type]} element [description]
- * @return {[type]}         [description]
+ * @param  {[type]} element [a mache compositon_element]
+ * @return {[object]}       [key: nameOfClipping , elem: clipping]
  */
 function getClip(element){
 
@@ -110,9 +113,10 @@ module.exports = {
 	/**
 	 * oldMultiCreate creats the a list of multiple elements holding the id using
 	 * using old api format
-	 * @param  {[type]} objectMache 	[the mache object]	
-	 * @param  {[type]} cb              [callback function]	
-	 * @return {[type]} cb              [an array of ids]
+	 * @param  {[type]} objectMache 	    [the mache object]	
+	 * @param  {[function]} cb              [callback function]	
+	 * @return {[err]} err                  [an error]
+	 * @return {[array]} listOfElements     [an array of doc ids of elements]
 	 */
 	oldMultiCreate: function(objectMache, cb) {
 		var clippings = [];
@@ -168,6 +172,15 @@ module.exports = {
 				return cb(null,listOfElements)
 			}
 		);
+	},
+	create: function(cb){
+
+	},
+	edit: function(cb){
+
+	},
+	delete: function(cb){
+		
 	}
 
 };
