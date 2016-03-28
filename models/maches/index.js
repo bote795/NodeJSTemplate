@@ -87,7 +87,7 @@ module.exports = {
 			oldChildrenArray.push( {composition_element: children[i]});
 		};
 		mache["_doc"]["composition_space"]["children"] = oldChildrenArray;
-		cb(null,mache);
+		cb(null,{Information_composition: mache});
 	}
 
 };
