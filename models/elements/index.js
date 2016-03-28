@@ -111,15 +111,14 @@ module.exports = {
 	 * oldMultiCreate creats the a list of multiple elements holding the id using
 	 * using old api format
 	 * @param  {[type]} objectMache 	[the mache object]	
-	 * @param  {[type]} tempMache       [the temp mache object]	
 	 * @param  {[type]} cb              [callback function]	
 	 * @return {[type]} cb              [an array of ids]
 	 */
-	oldMultiCreate: function(objectMache, tempMache, cb) {
+	oldMultiCreate: function(objectMache, cb) {
 		var clippings = [];
 		var modelclippings = [];
 		//create a list of all unique clippings
-		var metadataEElements = tempMache.composition_space;
+		var metadataEElements = objectMache.composition_space;
 		for (var i = 0; i < metadataEElements.children.length; i++) {
 			var metadata =getClip(metadataEElements.children[i].composition_element);
 			//if not found add to array

@@ -19,8 +19,6 @@ module.exports = {
 		};
 		//need mache to get all data
 		var objectMache = simpl.graphExpand(JSON.parse(oldFormat));
-		//need a copy mache to be able to retrieve metadata 
-		var tempMache = simpl.graphExpand(JSON.parse(oldFormat)).information_composition;
 		objectMache = objectMache.information_composition;
 		var newMache = new Mache();
 
@@ -44,7 +42,7 @@ module.exports = {
 		//element save multi creates
 		//inside of it save clippings as well
 		//then save mache if no errors
-		Element.oldMultiCreate(objectMache, tempMache ,function(err,listOfIds){
+		Element.oldMultiCreate(objectMache ,function(err,listOfIds){
 			if (err) {
 				cb(err);
 			};
