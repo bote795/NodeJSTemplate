@@ -25,13 +25,29 @@ module.exports = {
             cb(null,clip);
 		});
 	},
-	create: function(cb){
-
+	create: function(values,cb){
+		values= (values != null) ? values : null;
+		var newClipping = new Clipping();
+		if (values != null) {
+			newClipping.clip = values.clip;
+		}
+		newClipping.save(function(err, clipping) {
+            if(err) {
+                cb(err);
+            }
+            cb(null,clipping);
+	   	});
 	},
 	edit: function(cb){
 
 	},
 	delete: function(cb){
-		
+		Clipping.remove({
+			_id: id
+		},function(err){
+			if (err) {
+				cb(err);
+			}
+		});
 	}
 };

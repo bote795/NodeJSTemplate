@@ -35,6 +35,14 @@ function retrieveFields (newMache, element) {
 		}
 	}
 }
+/**
+ * filter check if all keys in object are legal fields
+ * @param  {[type]} elementValues    [Object  that contains members of
+								      Key value pairs with key being changed and new value
+								      { title: James
+								      } ]
+ * @return {[Object]} filteredObject [object that has values already fitlered]
+ */
 function filter(arguments){
 	var keys = Object.keys(arguments);
 	var filterEdits = keys.filter(function(value,i){
@@ -120,6 +128,12 @@ module.exports = {
 		mache["_doc"]["composition_space"]["children"] = oldChildrenArray;
 		cb(null,{Information_composition: mache});
 	},
+	/**
+	 * create function creates a mache 
+	 * @param  {[object]} values [an object with key value pairs of macheFields]
+	 * @param  {Function} cb     [callback function]
+	 * @return {[model]}          [returns mache]
+	 */
 	create: function(values, cb){
 		values= (values != null) ? filter(values) : null;
 		var newMache = new Mache();
@@ -131,6 +145,13 @@ module.exports = {
 				cb(null, mache);
 			});
 	},
+	/**
+	 * edit function to edit a mache
+	 * @param  {[mongoose Id]}   id    [mongoose id]
+	 * @param  {[object]}   edits [an object with key value pairs of macheFields]
+	 * @param  {Function} cb    [callback]
+	 * @return {[type]}         [description]
+	 */
 	edit: function(id,edits,cb){
 		var filterEdits = filter(edits);
 		Mache.findByIdAndUpdate(id, 
